@@ -41,7 +41,7 @@ protected:
    size_t m_line_count;
 public:
    NtfLayer(const std::string& name = std::string())
-      { m_name = name; m_line_count = 0; };
+      { m_name = name; m_line_count = 0; }
    size_t getLineCount()
       { return m_line_count; }
    std::string getName()

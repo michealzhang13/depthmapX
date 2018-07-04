@@ -2597,7 +2597,9 @@ bool ShapeGraph::read(std::istream &stream, int version )
    m_map_type = ShapeMap::EMPTYMAP;
 
    // note that keyvertexcount and keyvertices are different things! (length keyvertices not the same as keyvertexcount!)
-   stream.read((char *)&m_keyvertexcount,sizeof(m_keyvertexcount));
+   int keyvertexcount;
+   stream.read((char *)&keyvertexcount,sizeof(keyvertexcount));
+   m_keyvertexcount = keyvertexcount;
    int size;
    stream.read((char *)&size,sizeof(size));
    for (int i = 0; i < size; i++) {
@@ -2683,7 +2685,8 @@ bool ShapeGraph::readold( std::istream& stream, int version )
 bool ShapeGraph::write( std::ofstream& stream, int version )
 {
    // note keyvertexcount and keyvertices are different things!  (length keyvertices not the same as keyvertexcount!)
-   stream.write((char *)&m_keyvertexcount,sizeof(m_keyvertexcount));
+   int keyvertexcount = static_cast<int>(m_keyvertexcount);
+   stream.write((char *)&keyvertexcount,sizeof(keyvertexcount));
    int size = static_cast<int>(m_keyvertices.size());
    stream.write((char *)&size,sizeof(size));
    for (size_t i = 0; i < m_keyvertices.size(); i++) {

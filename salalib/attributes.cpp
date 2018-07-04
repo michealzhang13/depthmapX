@@ -51,7 +51,7 @@ AttributeTable::AttributeTable(const std::string& name)
    //
    // everything apart from the default layer is available for use:
    // Quick mod - TV
-   m_available_layers = 0xfffffffffffffffeUL;
+   m_available_layers = 0xffffffff << 32 + 0xfffffffe;
    // display the default layer only (everything):
    m_visible_layers = 0x1;
    m_layers.add(1,"Everything");
