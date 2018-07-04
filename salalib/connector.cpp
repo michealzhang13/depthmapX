@@ -56,24 +56,23 @@ bool Connector::write( std::ofstream& stream )
 
 // Cursor extras
 
-int Connector::count(int mode) const
+size_t Connector::count(int mode) const
 {
-   int c = 0;
    switch (mode) {
    case CONN_ALL:
-      c = m_connections.size();
+      return m_connections.size();
       break;
    case SEG_CONN_ALL:
-      c = m_back_segconns.size() + m_forward_segconns.size();
+      return m_back_segconns.size() + m_forward_segconns.size();
       break;
    case SEG_CONN_FW:
-      c = m_forward_segconns.size();
+      return m_forward_segconns.size();
       break;
    case SEG_CONN_BK:
-      c = m_back_segconns.size();
+      return m_back_segconns.size();
       break;
    }
-   return c;
+   return 0;
 }
 int Connector::cursor(int mode) const
 {

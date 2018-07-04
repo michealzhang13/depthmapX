@@ -277,7 +277,7 @@ public:
    void removePolyPixels(int shaperef);
    //
    //
-   void init(int size, const QtRegion& r);
+   void init(size_t size, const QtRegion& r);
    int getNextShapeKey();
    // convert a single point into a shape
    int makePointShapeWithRef(const Point2f& point, int shape_ref, bool tempshape = false, const std::map<int,float> &extraAttributes = std::map<int, float>());
@@ -347,11 +347,11 @@ public:
    // Cut a line according to the first shape it cuts
    void cutLine(Line& li);//, short dir);
    // Connect a particular shape into the graph
-   int connectIntersected(int rowid, bool linegraph);
+   size_t connectIntersected(int rowid, bool linegraph);
    // Get the connections for a particular line
-   int getLineConnections(int lineref, pvecint& connections, double tolerance);
+   size_t getLineConnections(int lineref, pvecint& connections, double tolerance);
    // Get arbitrary shape connections for a particular shape
-   int getShapeConnections(int polyref, pvecint& connections, double tolerance);
+   size_t getShapeConnections(int polyref, pvecint& connections, double tolerance);
    // Make all connections
    void makeShapeConnections();
    //
@@ -600,7 +600,7 @@ public:
    const T& getLastMap() const
    { return prefvec<T>::tail(); }
    //
-   size_t getMapRef(const std::string& name) const;
+   int getMapRef(const std::string& name) const;
    //
    size_t getObjectCount() const
    { return prefvec<T>::at(m_displayed_map).getObjectCount(); }
@@ -648,12 +648,12 @@ void ShapeMaps<T>::removeMap(size_t map)
       m_displayed_map--; 
 }
 template <class T>
-size_t ShapeMaps<T>::getMapRef(const std::string& name) const
+int ShapeMaps<T>::getMapRef(const std::string& name) const
 {  
    // note, only finds first map with this name
    for (size_t i = 0; i < pmemvec<T*>::size(); i++) {
       if (prefvec<T>::at(i).getName() == name)
-         return i;
+         return static_cast<int>(i);
    }
    return -1;
 }

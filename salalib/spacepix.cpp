@@ -749,11 +749,11 @@ void SpacePixel::cutLine(Line& l, short dir)
                            for (size_t k = 0; k < touching_lines.size() && pair == -1; k++) {
                               if (linetest.line.start() == touching_lines[k].start() || linetest.line.end() == touching_lines[k].end()) {
                                  a = linetest.line.end() - linetest.line.start();
-                                 pair = k;
+                                 pair = static_cast<int>(k);
                               }
                               else if (linetest.line.start() == touching_lines[k].end() || linetest.line.end() == touching_lines[k].start()) {
                                  a = linetest.line.start() - linetest.line.end();
-                                 pair = k;
+                                 pair = static_cast<int>(k);
                               }
                               if (pair != -1) {
                                  b = touching_lines[pair].end() - touching_lines[pair].start();

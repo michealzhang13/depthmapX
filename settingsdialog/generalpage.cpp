@@ -18,7 +18,7 @@
 #include "depthmapX/settings.h"
 
 GeneralPage::GeneralPage(Settings &settings, QWidget *parent)
-    : SettingsPage(settings, parent)
+    : SettingsPage(parent)
 {
     readSettings(settings);
     QGroupBox *configGroup = new QGroupBox(tr("General configuration"));

@@ -101,7 +101,7 @@ bool ShapeMap::read( std::ifstream& stream, int version, bool drawinglayer )
       m_shape_ref = -1;
       for (size_t i = 0; i < layer.m_lines.size(); i++) {
          m_shape_ref++;
-         int index = m_shapes.add(m_shape_ref, SalaShape(layer.m_lines[i].line));
+         m_shapes.add(m_shape_ref, SalaShape(layer.m_lines[i].line));
          // insert a dummy attribute row:
          m_attributes.insertRow(m_shape_ref);
          // note: as this is always a drawing layer, no need to set shape attributes
@@ -166,7 +166,7 @@ bool ShapeMap::read( std::ifstream& stream, int version, bool drawinglayer )
    for (int j = 0; j < count; j++) {
       int key;
       stream.read((char *) &key, sizeof(key));
-      int index = m_shapes.add(key, SalaShape());
+      int index = static_cast<int>(m_shapes.add(key, SalaShape()));
       m_shapes.value(index).read(stream,version);
    }
    if (version < VERSION_SHAPE_CENTROIDS) {
@@ -193,7 +193,7 @@ bool ShapeMap::read( std::ifstream& stream, int version, bool drawinglayer )
    for (int k = 0; k < count; k++) {
       int key;
       stream.read((char *) &key, sizeof(key));
-      int index = m_objects.add(key, SalaObject());
+      int index = static_cast<int>(m_objects.add(key, SalaObject()));
       m_objects.value(index).read(stream,version);
    }
    // read attribute data
@@ -255,7 +255,7 @@ void ShapeMap::makePolyPixels(int polyref)
    if (poly.isClosed()) {
       pmap<int,int> relations;
       for (size_t k = 0; k < poly.size(); k++) {
-         int nextk = (k + 1) % poly.size();
+         int nextk = static_cast<int>((k + 1) % poly.size());
          Line li(poly[k],poly[nextk]);
          if (k == 0) {
             poly.m_region = li;
@@ -273,7 +273,7 @@ void ShapeMap::makePolyPixels(int polyref)
             if (x == paftl::npos) {
                x = m_pixel_shapes[pix.x][pix.y].add(ShapeRef(polyref),paftl::ADD_HERE);
             }
-            m_pixel_shapes[pix.x][pix.y][x].m_polyrefs.push_back(k);
+            m_pixel_shapes[pix.x][pix.y][static_cast<int>(x)].m_polyrefs.push_back(static_cast<short>(k));
             relations.add(pixels[i],ShapeRef::SHAPE_EDGE);
          }
       }
@@ -328,7 +328,7 @@ void ShapeMap::makePolyPixels(int polyref)
                   break;
                }
                // returns -1 if cannot add due to already existing:
-               pos = m_pixel_shapes[nextpix.x][nextpix.y].add(ShapeRef(polyref,ShapeRef::SHAPE_CENTRE));
+               pos = static_cast<int>(m_pixel_shapes[nextpix.x][nextpix.y].add(ShapeRef(polyref,ShapeRef::SHAPE_CENTRE)));
                pix = nextpix;
             } while (pos != -1);
          }
@@ -362,7 +362,7 @@ void ShapeMap::makePolyPixels(int polyref)
          break;
       case SalaShape::SHAPE_POLY:
          for (size_t k = 0; k < poly.size() - 1; k++) {
-            int nextk = (k + 1);
+            int nextk = static_cast<int>(k + 1);
             Line li(poly[k],poly[nextk]);
             if (k == 0) {
                poly.m_region = li;
@@ -377,7 +377,7 @@ void ShapeMap::makePolyPixels(int polyref)
                if (x == paftl::npos) {
                   x = m_pixel_shapes[pix.x][pix.y].add(ShapeRef(polyref,ShapeRef::SHAPE_OPEN),paftl::ADD_HERE);
                }
-               m_pixel_shapes[pix.x][pix.y][x].m_polyrefs.push_back(k);
+               m_pixel_shapes[pix.x][pix.y][x].m_polyrefs.push_back(static_cast<short>(k));
             }
          }
          break;
@@ -461,8 +461,6 @@ bool SalaShape::read(std::ifstream& stream, int version)
    m_selected = false;
 
    stream.read((char *)&m_type,sizeof(m_type));
-
-   int sss = sizeof(m_region);
    stream.read((char *)&m_region,sizeof(m_region));
 
    if (version >= VERSION_SHAPE_CENTROIDS) {
@@ -530,12 +528,12 @@ int ShapeMap::makeShapeFromPointSet(const PointMap& pointmap)
    }
    if (!bounds_good) {
       QtRegion r(pointmap.getRegion().bottom_left - offset,pointmap.getRegion().top_right + offset);
-      init(m_shapes.size(),r);
+      init(static_cast<int>(m_shapes.size()),r);
    }
    pmap<int,int> relations;
    for (size_t j = 0; j < selset.size(); j++) {
       PixelRef pix = selset[j];
-      int x = relations.add(pix,ShapeRef::SHAPE_EDGE);
+      int x = static_cast<int>(relations.add(pix,ShapeRef::SHAPE_EDGE));
       if (pointmap.includes(pix.right()) && pointmap.getPoint(pix.right()).selected()) {
          relations.value(x) &= ~ShapeRef::SHAPE_R;
       }
@@ -563,8 +561,6 @@ int ShapeMap::makeShapeFromPointSet(const PointMap& pointmap)
    SalaShape poly(SalaShape::SHAPE_POLY | SalaShape::SHAPE_CLOSED);
    pointPixelBorder(pointmap,relations,poly,ShapeRef::SHAPE_L,minpix,minpix,true);
 
-   bool retvar = true;
-
    for (k = 0; k < relations.size(); k++) {
       if (relations[k] != 0) {
          // more than one shape!
@@ -574,7 +570,7 @@ int ShapeMap::makeShapeFromPointSet(const PointMap& pointmap)
    poly.setCentroidAreaPerim();
 
    m_shape_ref++;
-   int rowid = m_shapes.add(m_shape_ref,poly);
+   m_shapes.add(m_shape_ref,poly);
 
    if (bounds_good) {
       // note: also sets polygon bounding box:
@@ -759,12 +755,12 @@ int ShapeMap::makeLineShape(const Line& line, bool through_ui, bool tempshape)
 
    if (!(m_region.contains_touch(line.start()) && m_region.contains_touch(line.end()))) {
       bounds_good = false;
-      init(m_shapes.size(),line);
+      init(static_cast<int>(m_shapes.size()),line);
    }
 
    m_shape_ref++;
    // note, shape constructor sets centroid, length etc
-   int rowid = m_shapes.add(m_shape_ref,SalaShape(line));
+   int rowid = static_cast<int>(m_shapes.add(m_shape_ref,SalaShape(line)));
 
    if (bounds_good) {
       // note: also sets polygon bounding box:
@@ -875,7 +871,7 @@ int ShapeMap::getLineConnections(int lineref, pvecint& connections, double toler
                   // n.b. originally this followed the logic that we must normalise intersect_line properly: tolerance * line length one * line length two
                   // in fact, works better if it's just line.length() * tolerance...
                   if ( intersect_line(line, l, line.length() * tolerance) ) {
-                     connections.add(m_shapes.searchindex(shape.m_shape_ref));
+                     connections.add(static_cast<int>(m_shapes.searchindex(shape.m_shape_ref)));
                      num_intersections++;
                   }
                }
@@ -921,7 +917,7 @@ int ShapeMap::getShapeConnections(int shaperef, pvecint& connections, double tol
       }
    }
 
-   return connections.size();
+   return static_cast<int>(connections.size());
 }
 
 // similar to above, but builds a list
@@ -981,7 +977,7 @@ void ShapeMap::lineInPolyList(const Line& li_orig, pvecint& shapeindexlist, int 
                   if (intersect_region(li,poly.m_region)) {
                      // note: in this case m_region is stored as a line:
                      if (intersect_line(li,poly.m_region,tolerance)) {
-                        shapeindexlist.add(m_shapes.searchindex(shape.m_shape_ref));
+                        shapeindexlist.add(static_cast<int>(m_shapes.searchindex(shape.m_shape_ref)));
                      }
                   }
                   break;
@@ -991,7 +987,7 @@ void ShapeMap::lineInPolyList(const Line& li_orig, pvecint& shapeindexlist, int 
                         Line lineb = Line(poly[shape.m_polyrefs[k]],poly[((shape.m_polyrefs[k]+1)%poly.size())]);
                         if (intersect_region(li,lineb)) {
                            if (intersect_line(li,lineb,tolerance)) {
-                              shapeindexlist.add(m_shapes.searchindex(shape.m_shape_ref));
+                              shapeindexlist.add(static_cast<int>(m_shapes.searchindex(shape.m_shape_ref)));
                            }
                         }
                      }
@@ -1030,7 +1026,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                   ShapeRef& shaperef = shaperefs[i];
                   if (i != pos && ((shaperefs[pos].m_tags & ShapeRef::SHAPE_CENTRE) || (shaperef.m_tags & ShapeRef::SHAPE_CENTRE))) {
                      if (testedlist.add(shaperef.m_shape_ref) != -1) {
-                        shapeindexlist.add(m_shapes.searchindex(shaperef.m_shape_ref));
+                        shapeindexlist.add(static_cast<int>(m_shapes.searchindex(shaperef.m_shape_ref)));
                      }
                   }
                }
@@ -1077,7 +1073,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                         else if (polyb.isPolyLine()) {
                            if (testPointInPoly(polyb[shaperefb.m_polyrefs[0]],shaperef) != -1)  {
                               testedlist.add(shaperefb.m_shape_ref,paftl::ADD_HERE);
-                              shapeindexlist.add(indexb);
+                              shapeindexlist.add(static_cast<int>(indexb));
                            }
                            else {
                               for (int k = 0; k < shaperef.m_polyrefs.size(); k++) {
@@ -1087,7 +1083,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                                     if (intersect_region(line,lineb)) {
                                        if (intersect_line(line,lineb,tolerance)) {
                                           if (testedlist.add(shaperefb.m_shape_ref) != -1) {
-                                             shapeindexlist.add(indexb);
+                                             shapeindexlist.add(static_cast<int>(indexb));
                                              break;
                                           }
                                        }
@@ -1104,7 +1100,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                            if ((pixelate(polyb[shaperefb.m_polyrefs[0]]) == PixelRef(x,y) && testPointInPoly(polyb[shaperefb.m_polyrefs[0]],shaperef) != -1) ||
                                (pixelate(poly[shaperef.m_polyrefs[0]]) == PixelRef(x,y) && testPointInPoly(poly[shaperef.m_polyrefs[0]],shaperefb) != -1))  {
                               testedlist.add(shaperefb.m_shape_ref,paftl::ADD_HERE);
-                              shapeindexlist.add(indexb);
+                              shapeindexlist.add(static_cast<int>(indexb));
                            }
                            else {
                               // now check crossing
@@ -1116,7 +1112,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                                     if (intersect_region(line,lineb)) {
                                        if (intersect_line(line,lineb,tolerance)) {
                                           testedlist.add(shaperefb.m_shape_ref,paftl::ADD_HERE);
-                                          shapeindexlist.add(indexb);
+                                          shapeindexlist.add(static_cast<int>(indexb));
                                           breakit = true;
                                           break;
                                        }
@@ -1232,7 +1228,7 @@ int ShapeMap::testPointInPoly(const Point2f& p, const ShapeRef& shape) const
             pvecint testnodes;
             size_t j;
             for (j = 0; j < size_t(shape.m_polyrefs.size()); j++) { // <- note, polyrefs is a subvec and has maximum number according to sizeof(T)
-               testnodes.add(shape.m_polyrefs[j]);
+               testnodes.add(shape.m_polyrefs[static_cast<short>(j)]);
             }
             PixelRef pix2 = pixelate(p);
             // bit of code duplication like this, but easier on params to this function:
@@ -1308,7 +1304,7 @@ bool ShapeMap::write(std::ostream &stream, int version )
    stream.write((char *) &m_shape_ref, sizeof(m_shape_ref));
 
    // write shape data
-   int count = m_shapes.size();
+   int count = static_cast<int>(m_shapes.size());
    stream.write((char *) &count, sizeof(count));
    for (int j = 0; j < count; j++) {
       int key = m_shapes.key(j);
@@ -1316,7 +1312,7 @@ bool ShapeMap::write(std::ostream &stream, int version )
       m_shapes.value(j).write(stream);
    }
    // write object data (currently unused)
-   count = m_objects.size();
+   count = static_cast<int>(m_objects.size());
    stream.write((char *) &count, sizeof(count));
    for (int k = 0; k < count; k++) {
       int key = m_objects.key(k);
@@ -1328,7 +1324,7 @@ bool ShapeMap::write(std::ostream &stream, int version )
    stream.write((char *)&m_displayed_attribute,sizeof(m_displayed_attribute));
 
    // write connections data
-   count = m_connectors.size();
+   count = static_cast<int>(m_connectors.size());
    stream.write((char *)&count,sizeof(count));
 
    for (int i = 0; i < count; i++) {

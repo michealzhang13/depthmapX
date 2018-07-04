@@ -51,7 +51,7 @@ AttributeTable::AttributeTable(const std::string& name)
    //
    // everything apart from the default layer is available for use:
    // Quick mod - TV
-   m_available_layers = 0xffffffff << 32 + 0xfffffffe;
+   m_available_layers = 0xfffffffffffffffeUL;
    // display the default layer only (everything):
    m_visible_layers = 0x1;
    m_layers.add(1,"Everything");
@@ -73,9 +73,9 @@ int AttributeTable::insertColumn(const std::string& name)
       for (size_t i = 0; i < size(); i++) {
          at(i).push_back(-1.0f);
       }
-      m_columns[index].m_physical_col = m_columns.size() - 1;
+      m_columns[index].m_physical_col = static_cast<int>(m_columns.size()) - 1;
    }
-   return index;
+   return static_cast<int>(index);
 }
 
 void AttributeTable::removeColumn(int col)
@@ -117,12 +117,12 @@ int AttributeTable::renameColumn(int col, const std::string& name)
    newcolumn.m_name = name;
    index = m_columns.add(newcolumn);
    // you will now have to alter the displayed attribute accordingly...
-   return index;
+   return static_cast<int>(index);
 }
 
 int AttributeTable::insertRow(int key)
 {
-   int index = add(key,AttributeRow());
+   int index = static_cast<int>(add(key,AttributeRow()));
    value(index).init(m_columns.size());
    return index;
 }
@@ -158,7 +158,7 @@ bool AttributeTable::selectRowByKey(int key) const
       if ((m_visible_layers & value(index).m_layers) != 0 && !value(index).m_selected) {
          value(index).m_selected = true;
          m_sel_count++;
-         addSelValue(getValue(index,m_display_column));
+         addSelValue(getValue(static_cast<int>(index),m_display_column));
       }
       else {
          // already selected or not visible
@@ -266,7 +266,7 @@ bool AttributeTable::selectionToLayer(const std::string& name)
       // too many layers -- maximum 64
       return false;
    }
-   int64 newlayer = 0x1 << loc;
+   int64 newlayer = 0x1LL << loc;
    // now layer has been found, eliminate from available layers 
    // and add a lookup for the name
    m_available_layers = (m_available_layers & (~newlayer));
@@ -274,7 +274,7 @@ bool AttributeTable::selectionToLayer(const std::string& name)
 
    // convert everything in the selection to the new layer
    for (size_t i = 0; i < size(); i++) {
-      if (isVisible(i) && isSelected(i)) {
+      if (isVisible(static_cast<int>(i)) && isSelected(static_cast<int>(i))) {
          at(i).m_layers |= newlayer;
       }
    }
@@ -328,7 +328,7 @@ bool AttributeTable::read( std::istream& stream, int version )
    stream.read((char *)&rowcount, sizeof(rowcount));
    for (int i = 0; i < rowcount; i++) {
       stream.read((char *)&rowkey, sizeof(rowkey));
-      int index = add(rowkey,AttributeRow());
+      int index = static_cast<int>(add(rowkey,AttributeRow()));
 
       stream.read((char *)&(value(index).m_layers),sizeof(int64));
 
@@ -346,7 +346,7 @@ bool AttributeTable::write( std::ofstream& stream, int version )
 
    stream.write((char *)&m_available_layers,sizeof(int64));
    stream.write((char *)&m_visible_layers,sizeof(int64));
-   int count = m_layers.size();
+   int count = static_cast<int>(m_layers.size());
    stream.write((char *)&count,sizeof(int));
    for (size_t i = 0; i < m_layers.size(); i++) {
       int64 key = m_layers.key(i);
@@ -354,12 +354,12 @@ bool AttributeTable::write( std::ofstream& stream, int version )
       dXstring::writeString(stream ,m_layers.value(i));
    }
 
-   int colcount = m_columns.size();
+   int colcount = static_cast<int>(m_columns.size());
    stream.write((char *)&colcount, sizeof(colcount));
    for (int j = 0; j < colcount; j++) {
       m_columns[j].write(stream,version);
    }
-   int rowcount = size(), rowkey;
+   int rowcount = static_cast<int>(size()), rowkey;
    stream.write((char *)&rowcount, sizeof(rowcount));
    for (int i = 0; i < rowcount; i++) {
       rowkey = key(i);
@@ -593,8 +593,8 @@ int AttributeIndex::makeIndex(const AttributeTable& table, int col, bool setdisp
    // viscount is simply a count of everything that is visible
    int viscount = 0;
    // n.b., attributes, axial lines and line refs must match
-   size_t i;
-   for (i = 0; i < rowcount; i++)
+
+   for (int i = 0; i < rowcount; i++)
    {
       at(i).index = i;
       if (col != -1) {
@@ -646,7 +646,7 @@ int AttributeIndex::makeIndex(const AttributeTable& table, int col, bool setdisp
 
    qsort(m_data,rowcount,sizeof(ValuePair),compareValuePair);
 
-   for (i = 0; i < rowcount; i++) {
+   for (int i = 0; i < rowcount; i++) {
       // note: this is to ensure we have save settings for the table ranges where data has been overwritten:
       if (setdisplayinfo) {
          at(i).value = (col != -1) ? table.getNormValue(at(i).index,col) : double(table.getRowKey(at(i).index))/table.getMaxRowKey();

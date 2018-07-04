@@ -23,8 +23,6 @@ TEST_CASE("Test GLRasterTexture::loadRegionData()", "")
     float topRightX = 2;
     float topRightY  = 4;
 
-    QRgb lineColour = qRgb(255,0,0);
-
     GLRasterTexture glrastertexture;
     glrastertexture.loadRegionData(bottomLeftX, bottomLeftY, topRightX, topRightY);
 

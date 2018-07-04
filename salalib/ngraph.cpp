@@ -261,7 +261,7 @@ void Bin::make(const PixelRefVector& pixels, char dir)
          }
 
          m_pixel_vecs.push_back(cur);
-         m_node_count = pixels.size();
+         m_node_count = static_cast<unsigned short>(pixels.size());
       }
       else {
          // Reorder the pixels:
@@ -304,7 +304,7 @@ void Bin::make(const PixelRefVector& pixels, char dir)
             m_pixel_vecs.back().m_end = *pixels_v.rbegin();
          }
 
-         m_node_count = pixels.size();
+         m_node_count = static_cast<unsigned short>(pixels.size());
       }
    }
 }
@@ -474,7 +474,7 @@ std::ofstream& Bin::write(std::ofstream& stream, int version)
       }
       else {
          // TODO: Remove this limitation in the next version of the .graph format
-         unsigned short length = m_pixel_vecs.size();
+         unsigned short length = static_cast<unsigned short>(m_pixel_vecs.size());
          stream.write( (char *) &length, sizeof(length) );
          m_pixel_vecs[0].write(stream,m_dir);
          for (int i = 1; i < length; i++) {

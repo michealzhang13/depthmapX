@@ -19,7 +19,7 @@
 
 TEST_CASE("Test getVisibleLines", "")
 {
-    const float EPSILON = 0.001;
+    const float EPSILON = 0.001f;
 
     // create a new MetaGraph
     std::unique_ptr<MetaGraph> mgraph(new MetaGraph());

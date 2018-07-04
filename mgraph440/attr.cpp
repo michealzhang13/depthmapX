@@ -409,7 +409,7 @@ bool ArVertexList::write( std::ostream& stream )
    // attributes...
    stream.write( (char *) &m_attr_header.m_attr_count, sizeof(int) );
 
-   int size = m_attributes.size();
+   int size = static_cast<int>(m_attributes.size());
    stream.write( (char *) &size, sizeof(int) );
 
    for (size_t i = 0; i < m_attributes.size(); i++) {

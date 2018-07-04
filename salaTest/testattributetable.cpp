@@ -300,11 +300,11 @@ TEST_CASE("Existing and non-existing rows")
     REQUIRE_THROWS_AS(table.getRow(5), std::out_of_range);
     REQUIRE_THROWS_AS(constRef.getRow(5), std::out_of_range);
 
-    REQUIRE( table.getRowPtr(1) != 0);
-    REQUIRE( constRef.getRowPtr(1) != 0);
+    REQUIRE( table.getRowPtr(1) != nullptr );
+    REQUIRE( constRef.getRowPtr(1) != nullptr );
 
-    REQUIRE( table.getRowPtr(5) == 0);
-    REQUIRE( constRef.getRowPtr(5) == 0);
+    REQUIRE( table.getRowPtr(5) == nullptr );
+    REQUIRE( constRef.getRowPtr(5) == nullptr );
 }
 
 TEST_CASE("normalised values"){

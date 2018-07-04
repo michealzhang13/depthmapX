@@ -468,7 +468,7 @@ int MetaGraph::makeIsovist(Communicator *communicator, const Point2f& p, double 
       if (shapelayer == -1) {
          m_dataMaps.emplace_back("Isovists",ShapeMap::DATAMAP);
          setDisplayedDataMapRef(m_dataMaps.size() - 1);
-         shapelayer = m_dataMaps.size() - 1;
+         shapelayer = static_cast<int>(m_dataMaps.size()) - 1;
          m_state |= DATAMAPS;
          retvar = 2;
       }
@@ -536,7 +536,7 @@ int MetaGraph::makeIsovistPath(Communicator *communicator, double fov, bool simp
                isovistmapref = getMapRef(m_dataMaps, "Isovists");
                if (isovistmapref == -1) {
                   m_dataMaps.emplace_back("Isovists",ShapeMap::DATAMAP);
-                  isovistmapref = m_dataMaps.size() - 1;
+                  isovistmapref = static_cast<int>(m_dataMaps.size()) - 1;
                   setDisplayedDataMapRef(isovistmapref);
                   retvar = 2;
                }
@@ -640,7 +640,7 @@ bool MetaGraph::makeBSPtree(Communicator *communicator)
       m_bsp_root = new BSPNode();
 
       time_t atime = 0;
-      communicator->CommPostMessage( Communicator::NUM_RECORDS, partitionlines.size() );
+      communicator->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>(partitionlines.size()) );
       qtimer( atime, 0 );
 
       try {
@@ -664,7 +664,7 @@ bool MetaGraph::makeBSPtree(Communicator *communicator)
 
 int MetaGraph::addShapeGraph(const std::string& name, int type)
 {
-   int mapref= m_shape_graphs.addMap(name,type);
+   int mapref= static_cast<int>(m_shape_graphs.addMap(name,type));
    m_state |= SHAPEGRAPHS;
    setViewClass(SHOWAXIALTOP);
    // add a couple of default columns:
@@ -680,7 +680,7 @@ int MetaGraph::addShapeMap(const std::string& name)
    m_dataMaps.emplace_back(name,ShapeMap::DATAMAP);
    m_state |= DATAMAPS;
    setViewClass(SHOWSHAPETOP);
-   return m_dataMaps.size() - 1;
+   return static_cast<int>(m_dataMaps.size() - 1);
 }
 void MetaGraph::removeDisplayedMap()
 {
@@ -898,10 +898,10 @@ bool MetaGraph::convertToData(Communicator *comm, std::string layer_name, bool k
       // note however that more than one layer might be combined:
       // create map layer...
       m_dataMaps.emplace_back(layer_name,ShapeMap::DATAMAP);
-      int destmapref = m_dataMaps.size() - 1;
+      size_t destmapref = m_dataMaps.size() - 1;
       ShapeMap& destmap = m_dataMaps.back();
       AttributeTable& table = destmap.getAttributeTable();
-      int count = 0;
+      size_t count = 0;
       //
       // drawing to data
       if (typeflag == -1) {
@@ -1041,7 +1041,7 @@ bool MetaGraph::convertAxialToSegment(Communicator *comm, std::string layer_name
 
    bool retvar = false;
 
-   int orig_ref = m_shape_graphs.getDisplayedMapRef();
+   size_t orig_ref = m_shape_graphs.getDisplayedMapRef();
 
    try {
       int mapref = m_shape_graphs.convertAxialToSegment( comm, layer_name, keeporiginal, pushvalues, stubremoval);
@@ -1076,7 +1076,7 @@ int MetaGraph::loadMifMap(Communicator *comm, std::istream& miffile, std::istrea
    try {
       // create map layer...
       m_dataMaps.emplace_back(comm->GetMBInfileName(),ShapeMap::DATAMAP);
-      int mifmapref = m_dataMaps.size() - 1;
+      size_t mifmapref = m_dataMaps.size() - 1;
       ShapeMap& mifmap = m_dataMaps.back();
       retvar = mifmap.loadMifMap(miffile, midfile);
       if (retvar == MINFO_OK || retvar == MINFO_MULTIPLE) { // multiple is just a warning
@@ -1327,16 +1327,16 @@ int MetaGraph::loadLineData( Communicator *communicator, int load_type )
 int MetaGraph::loadCat( std::istream& stream, Communicator *communicator )
 {
    if (communicator) {
-      long size = communicator->GetInfileSize();
-      communicator->CommPostMessage( Communicator::NUM_RECORDS, size );
+      size_t size = communicator->GetInfileSize();
+      communicator->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>(size) );
    }
 
    time_t atime = 0;
    
    qtimer( atime, 0 );
 
-   long size = 0; 
-   int numlines = 0;
+   size_t size = 0;
+   size_t numlines = 0;
    int parsing = 0;
    bool first = true;
 
@@ -1444,7 +1444,7 @@ int MetaGraph::loadCat( std::istream& stream, Communicator *communicator )
             if (communicator->IsCancelled()) {
                throw Communicator::CancelledException();
             }
-            communicator->CommPostMessage( Communicator::CURRENT_RECORD, size );
+            communicator->CommPostMessage( Communicator::CURRENT_RECORD, static_cast<int>(size) );
          }
       }
    }
@@ -1512,6 +1512,9 @@ ShapeMap &MetaGraph::createNewShapeMap(depthmapX::ImportType mapType, std::strin
             return m_dataMaps.back();
         }
     }
+    std::stringstream msg;
+    msg << "Invalid map type [" << mapType << "] for createNewShapeMap()";
+    throw depthmapX::RuntimeException(msg.str());
 }
 
 void MetaGraph::deleteShapeMap(depthmapX::ImportType mapType, ShapeMap &shapeMap) {
@@ -1860,7 +1863,7 @@ int MetaGraph::getDisplayedMapRef() const
       ref = getDisplayedPointMapRef();
       break;
    case VIEWAXIAL:
-      ref = m_shape_graphs.getDisplayedMapRef();
+      ref = static_cast<int>(m_shape_graphs.getDisplayedMapRef());
       break;
    case VIEWDATA:
       ref = getDisplayedDataMapRef();
@@ -2325,7 +2328,7 @@ int MetaGraph::write( const std::string& filename, int version, bool currentlaye
          stream.write( (char *) &m_region, sizeof(m_region) );
 
          // Quick mod - TV
-         int count = m_drawingFiles.size();
+         int count = static_cast<int>(m_drawingFiles.size());
          stream.write( (char *) &count, sizeof(count) );
          for (auto& spacePixel: m_drawingFiles) {
             spacePixel.write(stream,version);
@@ -2403,8 +2406,8 @@ int MetaGraph::addNewPointMap(const std::string& name)
       }
    }
    m_pointMaps.push_back(PointMap(m_region, m_drawingFiles, myname));
-   m_displayed_pointmap = m_pointMaps.size() - 1;
-   return m_pointMaps.size() - 1;
+   m_displayed_pointmap = static_cast<int>(m_pointMaps.size()) - 1;
+   return m_displayed_pointmap;
 }
 
 bool MetaGraph::readPointMaps(std::istream& stream, int version)
@@ -2423,7 +2426,7 @@ bool MetaGraph::writePointMaps(std::ofstream& stream, int version, bool displaye
 {
    if (!displayedmaponly) {
       stream.write((char *) &m_displayed_pointmap, sizeof(m_displayed_pointmap));
-      int count = m_pointMaps.size();
+      int count = static_cast<int>(m_pointMaps.size());
       stream.write((char *) &count, sizeof(count));
       for (auto& pointmap: m_pointMaps) {
          pointmap.write( stream, version );
@@ -2449,7 +2452,7 @@ bool MetaGraph::readDataMaps(std::istream& stream, int version )
     // n.b. -- do not change to size_t as will cause 32-bit to 64-bit conversion problems
     unsigned int displayed_map;
     stream.read((char *)&displayed_map,sizeof(displayed_map));
-    m_displayed_datamap = size_t(displayed_map);
+    m_displayed_datamap = displayed_map;
     // read maps
     // n.b. -- do not change to size_t as will cause 32-bit to 64-bit conversion problems
     unsigned int count = 0;

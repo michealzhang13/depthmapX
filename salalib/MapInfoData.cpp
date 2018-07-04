@@ -55,7 +55,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
       {
          colnames.push_back(tokens[0]);
          table.insertColumn(colnames.back());
-         readable.push_back(i);
+         readable.push_back(static_cast<int>(i));
       }
    }
 
@@ -129,7 +129,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
             if (i != 0) {
                // warn about extraneous pline data
                retvar = MINFO_MULTIPLE;
-               duplicates.push_back(pointsets.size() - 1);
+               duplicates.push_back(static_cast<int>(pointsets.size()) - 1);
             }
          }
       }
@@ -187,7 +187,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
                }
                here++;
                if ((!instring && next == m_delimiter) || here >= line.length()) {
-                  int length = (here < line.length()) ? here-first-1 : here-first;
+                  size_t length = (here < line.length()) ? here-first-1 : here-first;
                   std::string field = line.substr(first,length);
                   first = here;
                   if (reading == readable[nextreadable]) {
@@ -351,7 +351,7 @@ bool MapInfoData::exportPolygons(std::ostream& miffile, std::ostream& midfile, c
    // dummy attributes table:
    AttributeTable attributes;
    for (size_t i = 0; i < polygons.size(); i++) {
-      attributes.insertRow(i);
+      attributes.insertRow(static_cast<int>(i));
    }
 
    // write the mid table

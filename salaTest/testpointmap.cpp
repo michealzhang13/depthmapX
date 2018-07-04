@@ -19,8 +19,7 @@
 
 TEST_CASE("Test MetaGraph construction", "")
 {
-    const float EPSILON = 0.001;
-    double spacing = 0.5;
+    const float EPSILON = 0.001f;
     Point2f offset(0,0); // seems that this is always set to 0,0
 
     // create a new MetaGraph
@@ -93,7 +92,7 @@ TEST_CASE("Test MetaGraph construction", "")
 
 TEST_CASE("Test grid filling", "")
 {
-    const float EPSILON = 0.001;
+    const float EPSILON = 0.001f;
     double spacing = 0.5;
     Point2f offset(0,0); // seems that this is always set to 0,0
 
@@ -178,7 +177,7 @@ TEST_CASE("Quirks in grid creation - Origin always at 0", "")
 {
 
     double spacing = 0.5;
-    const float EPSILON = 0.001;
+    const float EPSILON = 0.001f;
     Point2f offset(0,0); // seems that this is always set to 0,0
 
     Point2f bottomLeft(0,0);
@@ -277,7 +276,7 @@ TEST_CASE("Quirks in grid creation - Origin always at 0", "")
     std::unique_ptr<MetaGraph> metaGraph(new MetaGraph("Test MetaGraph"));
     metaGraph->setRegion(bottomLeft, topRight);
     PointMap pointMap(metaGraph->getRegion(), metaGraph->m_drawingFiles, "Test PointMap");
-    bool gridIsSet = pointMap.setGrid(spacing, offset);
+    pointMap.setGrid(spacing, offset);
 
     int bottomLeftPixelIndexX = int(floor(bottomLeft.x / spacing - 0.5)) + 1;
     int bottomLeftPixelIndexY = int(floor(bottomLeft.y / spacing - 0.5)) + 1;
@@ -346,9 +345,9 @@ TEST_CASE("PointMap copy, assign and add to vector")
                      gridBottomLeft.y + spacing * (floor(pointMap.getRows() * 0.5) + 0.5));
 
     int fill_type = 0; // = QDepthmapView::FULLFILL
-    bool gridIsSet = pointMap.setGrid(spacing, offset);
+    pointMap.setGrid(spacing, offset);
 
-    bool pointsMade = pointMap.makePoints(midPoint, fill_type);
+    pointMap.makePoints(midPoint, fill_type);
 
     bool boundaryGraph = false;
     double maxDist = -1;
@@ -379,7 +378,7 @@ TEST_CASE("PointMap copy, assign and add to vector")
 
 TEST_CASE("Test PointMap connections output", "")
 {
-    const float EPSILON = 0.001;
+    const float EPSILON = 0.001f;
     double spacing = 0.5;
     Point2f offset(0,0); // seems that this is always set to 0,0
 
@@ -413,9 +412,9 @@ TEST_CASE("Test PointMap connections output", "")
                      gridBottomLeft.y + spacing * (floor(pointMap.getRows() * 0.5) + 0.5));
 
     int fill_type = 0; // = QDepthmapView::FULLFILL
-    bool gridIsSet = pointMap.setGrid(spacing, offset);
+    pointMap.setGrid(spacing, offset);
 
-    bool pointsMade = pointMap.makePoints(midPoint, fill_type);
+    pointMap.makePoints(midPoint, fill_type);
 
     bool boundaryGraph = false;
     double maxDist = -1;

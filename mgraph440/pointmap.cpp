@@ -385,7 +385,7 @@ bool PointMaps::write(std::ostream& stream, int version, bool displayedmaponly)
 {
    if (!displayedmaponly) {
       stream.write((char *) &m_displayed_map, sizeof(m_displayed_map));
-      int count = size();
+      int count = static_cast<int>(size());
       stream.write((char *) &count, sizeof(count));
       for (int i = 0; i < count; i++) {
          at(i).write( stream, version );

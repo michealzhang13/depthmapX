@@ -54,7 +54,7 @@ AttributeTable::AttributeTable(const std::string& name)
    //
    // everything apart from the default layer is available for use:
    // Quick mod - TV
-   m_available_layers = 0xffffffff << 32 + 0xfffffffe;
+   m_available_layers = 0xfffffffffffffffeUL;
    // display the default layer only (everything):
    m_visible_layers = 0x1;
    m_layers.add(1,"Everything");
@@ -76,14 +76,14 @@ int AttributeTable::insertColumn(const std::string& name)
       for (size_t i = 0; i < size(); i++) {
          at(i).push_back(-1.0f);
       }
-      m_columns[index].m_physical_col = m_columns.size() - 1;
+      m_columns[static_cast<int>(index)].m_physical_col = static_cast<int>(m_columns.size()) - 1;
    }
-   return index;
+   return static_cast<int>(index);
 }
 
 int AttributeTable::insertRow(int key)
 {
-   int index = add(key,AttributeRow());
+   int index = static_cast<int>(add(key,AttributeRow()));
    value(index).init(m_columns.size());
    return index;
 }
@@ -143,7 +143,7 @@ bool AttributeTable::read( std::ifstream& stream, int version )
    stream.read((char *)&rowcount, sizeof(rowcount));
    for (int i = 0; i < rowcount; i++) {
       stream.read((char *)&rowkey, sizeof(rowkey));
-      int index = add(rowkey,AttributeRow());
+      int index = static_cast<int>(add(rowkey,AttributeRow()));
       if (version >= VERSION_MAP_LAYERS) {
          stream.read((char *)&(value(index).m_layers),sizeof(int64));
       }
@@ -260,8 +260,7 @@ int AttributeIndex::makeIndex(const AttributeTable& table, int col, bool setdisp
    // viscount is simply a count of everything that is visible
    int viscount = 0;
    // n.b., attributes, axial lines and line refs must match
-   size_t i;
-   for (i = 0; i < rowcount; i++)
+   for (int i = 0; i < rowcount; i++)
    {
       at(i).index = i;
       if (col != -1) {
@@ -313,7 +312,7 @@ int AttributeIndex::makeIndex(const AttributeTable& table, int col, bool setdisp
 
    qsort(m_data,rowcount,sizeof(ValuePair),compareValuePair);
 
-   for (i = 0; i < rowcount; i++) {
+   for (int i = 0; i < rowcount; i++) {
       // note: this is to ensure we have save settings for the table ranges where data has been overwritten:
       if (setdisplayinfo) {
          at(i).value = (col != -1) ? table.getNormValue(at(i).index,col) : double(table.getRowKey(at(i).index))/table.getMaxRowKey();
@@ -336,7 +335,7 @@ bool AttributeTable::write( std::ostream& stream, int version )
 
    stream.write((char *)&m_available_layers,sizeof(int64));
    stream.write((char *)&m_visible_layers,sizeof(int64));
-   int count = m_layers.size();
+   int count = static_cast<int>(m_layers.size());
    stream.write((char *)&count,sizeof(int));
    for (size_t i = 0; i < m_layers.size(); i++) {
       int64 key = m_layers.key(i);
@@ -344,12 +343,12 @@ bool AttributeTable::write( std::ostream& stream, int version )
       dXstring440::writeString(stream ,m_layers.value(i));
    }
 
-   int colcount = m_columns.size();
+   int colcount = static_cast<int>(m_columns.size());
    stream.write((char *)&colcount, sizeof(colcount));
    for (int j = 0; j < colcount; j++) {
       m_columns[j].write(stream,version);
    }
-   int rowcount = size(), rowkey;
+   int rowcount = static_cast<int>(size()), rowkey;
    stream.write((char *)&rowcount, sizeof(rowcount));
    for (int i = 0; i < rowcount; i++) {
       rowkey = key(i);

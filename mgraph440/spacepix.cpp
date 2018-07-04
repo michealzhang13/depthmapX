@@ -108,7 +108,7 @@ bool SpacePixel::read( std::ifstream& stream, int version )
 
       for (size_t m = 0; m < list.size(); m++) {
          // note: m_pixel_lines is an *ordered* list! --- used by other ops.
-         m_pixel_lines[list[m].x][list[m].y].push_back( n );
+         m_pixel_lines[list[static_cast<int>(m)].x][list[static_cast<int>(m)].y].push_back( static_cast<int>(n) );
       }
    }
 

@@ -48,7 +48,6 @@ static int compareValueTriplet(const void *p1, const void *p2)
 {
    ValueTriplet *vp1 = (ValueTriplet *) p1;
    ValueTriplet *vp2 = (ValueTriplet *) p2;
-   int v = vp1->value1 - vp2->value1;
    return (vp1->value1 > vp2->value1 ? 1 : vp1->value1 < vp2->value1 ? -1 :
           (vp1->value2 > vp2->value2 ? 1 : vp1->value2 < vp2->value2 ? -1 : 0));
 }
@@ -193,7 +192,7 @@ void AxialPolygons::init(std::vector<Line>& lines, const QtRegion& region)
 
    // for easier debugging, the axial code is reused to make segments
    ShapeGraph firstpass;
-   firstpass.init(lines.size(),m_region); // used to be double density
+   firstpass.init(static_cast<int>(lines.size()),m_region); // used to be double density
    firstpass.initialiseAttributesAxial();
    size_t i;
    for (i = 0; i < lines.size(); i++) {
@@ -212,7 +211,7 @@ void AxialPolygons::init(std::vector<Line>& lines, const QtRegion& region)
    // required
    makeVertexPossibles(lines, connectionset);
 
-   initLines(lines.size(), m_region.bottom_left, m_region.top_right, 2);
+   initLines(static_cast<int>(lines.size()), m_region.bottom_left, m_region.top_right, 2);
    // need to init before making pixel polys...
    makePixelPolys();
    // now also add lines
@@ -228,7 +227,6 @@ void AxialPolygons::makeVertexPossibles(const std::vector<Line>& lines, const pr
 {
    m_vertex_possibles.clear();
    m_vertex_polys.clear();
-   int currpoly = -1;
 
    size_t i = 0;
 
@@ -247,7 +245,7 @@ void AxialPolygons::makeVertexPossibles(const std::vector<Line>& lines, const pr
          pointlookup.push_back(lines[i].start());
          m_vertex_possibles.insert(std::make_pair(pointlookup.tail(),pqvector<Point2f>()));
          m_vertex_polys.push_back(-1); // <- n.b., dummy entry for now, maintain with vertex possibles
-         found[0][i] = pointlookup.size() - 1;
+         found[0][i] = static_cast<int>(pointlookup.size()) - 1;
          for (size_t j = 0; j < connectionset[i].m_back_segconns.size(); j++) {
             const SegmentRef& segref = connectionset[i].m_back_segconns.key(j);
             int forwback = (segref.dir == 1) ? 0 : 1;
@@ -258,7 +256,7 @@ void AxialPolygons::makeVertexPossibles(const std::vector<Line>& lines, const pr
          pointlookup.push_back(lines[i].end());
          m_vertex_possibles.insert(std::make_pair(pointlookup.tail(),pqvector<Point2f>()));
          m_vertex_polys.push_back(-1); // <- n.b., dummy entry for now, maintain with vertex possibles
-         found[1][i] = pointlookup.size() - 1;
+         found[1][i] = static_cast<int>(pointlookup.size()) - 1;
          for (size_t j = 0; j < connectionset[i].m_forward_segconns.size(); j++) {
             const SegmentRef& segref = connectionset[i].m_forward_segconns.key(j);
             int forwback = (segref.dir == 1) ? 0 : 1;
@@ -289,7 +287,7 @@ void AxialPolygons::makeVertexPossibles(const std::vector<Line>& lines, const pr
       if (m_vertex_polys[i] == -1) {
          current_poly++;
          pvecint addlist;
-         addlist.push_back(i);
+         addlist.push_back(static_cast<int>(i));
          while (addlist.size()) {
             m_vertex_polys[addlist.tail()] = current_poly;
             pqvector<Point2f>& connections = depthmapX::getMapAtIndex(m_vertex_possibles, addlist.tail())->second;
@@ -521,10 +519,10 @@ void AxialPolygons::makePolygons(prefvec<pqvector<Point2f>>& polygons)
          continue;
       }
       for (size_t j = 0; j < vertPoss.second.size(); j++) {
-         if (handled_list[i].findindex(j) != paftl::npos) {
+         if (handled_list[i].findindex(static_cast<int>(j)) != paftl::npos) {
             continue;
          }
-         handled_list[i].push_back(j);
+         handled_list[i].push_back(static_cast<int>(j));
          const Point2f& key = vertPoss.first;
          pqvector<Point2f> polygon;
          polygon.push_back(key);
@@ -545,12 +543,12 @@ void AxialPolygons::makePolygons(prefvec<pqvector<Point2f>>& polygons)
                      // check not going to a dead end:
                      if (m_vertex_possibles.find(vertPossIter->second.at(k))->second.size() > 1) {
                         minangle = thisangle;
-                        winner = k;
+                        winner = static_cast<int>(k);
                      }
                   }
                }
                else {
-                  wayback = k;
+                  wayback = static_cast<int>(k);
                }
             }
             if (winner == -1) {
@@ -617,8 +615,6 @@ bool ShapeGraphs::makeAllLineMap(Communicator *comm, std::vector<SpacePixelFile>
    // for ease, I'm just going to make a construction line set from all the visible lines...
 
    QtRegion region;
-   int size = 0;
-
    std::vector<Line> lines;
 
    // add all visible layers to the set of polygon lines...
@@ -672,7 +668,7 @@ bool ShapeGraphs::makeAllLineMap(Communicator *comm, std::vector<SpacePixelFile>
    if (comm) {
       qtimer( atime, 0 );
       comm->CommPostMessage( Communicator::CURRENT_STEP, 2 );
-      comm->CommPostMessage( Communicator::NUM_RECORDS, m_polygons.m_vertex_possibles.size() );
+      comm->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>(m_polygons.m_vertex_possibles.size()) );
    }
 
    pqvector<AxialVertex> openvertices;
@@ -714,7 +710,7 @@ bool ShapeGraphs::makeAllLineMap(Communicator *comm, std::vector<SpacePixelFile>
    }
 
    // create the all line map layer...
-   m_all_line_map = addMap("All-Line Map", ShapeMap::ALLLINEMAP);
+   m_all_line_map = static_cast<int>(addMap("All-Line Map", ShapeMap::ALLLINEMAP));
 
    ShapeGraph& alllinemap = at(m_all_line_map);
    // make sure it's cleared fully
@@ -871,7 +867,7 @@ bool ShapeGraphs::makeFewestLineMap(Communicator *comm, bool replace_existing)
    }
    if (subsetmapindex == -1) {
       // create the fewest line map layer...
-      subsetmapindex = addMap("Fewest-Line Map (Subsets)",ShapeMap::AXIALMAP);
+      subsetmapindex = static_cast<int>(addMap("Fewest-Line Map (Subsets)",ShapeMap::AXIALMAP));
       // note: new map has replace_existing set to true to ensure "init"
       replace_existing = true;
    }
@@ -894,7 +890,7 @@ bool ShapeGraphs::makeFewestLineMap(Communicator *comm, bool replace_existing)
    }
    if (minimalmapindex == -1) {
       // create the fewest line map layer...
-      minimalmapindex = addMap("Fewest-Line Map (Minimal)",ShapeMap::AXIALMAP);
+      minimalmapindex = static_cast<int>(addMap("Fewest-Line Map (Minimal)",ShapeMap::AXIALMAP));
       // note: new map has replace_existing set to true to ensure "init"
       replace_existing = true;
    }
@@ -917,7 +913,7 @@ bool ShapeGraphs::makeFewestLineMap(Communicator *comm, bool replace_existing)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-AxialMinimiser::AxialMinimiser(const ShapeGraph& alllinemap, int no_of_axsegcuts, int no_of_radialsegs)
+AxialMinimiser::AxialMinimiser(const ShapeGraph& alllinemap, size_t no_of_axsegcuts, size_t no_of_radialsegs)
 {
    m_alllinemap = (ShapeGraph *) &alllinemap;
 
@@ -942,7 +938,6 @@ AxialMinimiser::~AxialMinimiser()
 void AxialMinimiser::removeSubsets(std::map<int,pvecint>& axsegcuts, std::map<RadialKey,RadialSegment>& radialsegs, std::map<RadialKey,pvecint>& rlds,  pqvector<RadialLine>& radial_lines, prefvec<pvecint>& keyvertexconns, int *keyvertexcounts)
 {
    bool removedflag = true;
-   int counterrors = 0;
 
    m_axialconns = m_alllinemap->m_connectors;
 
@@ -1045,7 +1040,7 @@ void AxialMinimiser::removeSubsets(std::map<int,pvecint>& axsegcuts, std::map<Ra
                }
             }
             if (presumedvital) {
-               presumedvital = checkVital(removeindex,axSegCut,radialsegs,rlds,radial_lines);
+               presumedvital = checkVital(static_cast<int>(removeindex),axSegCut,radialsegs,rlds,radial_lines);
             }
             if (presumedvital) {
                m_vital[removeindex] = true;
@@ -1058,7 +1053,7 @@ void AxialMinimiser::removeSubsets(std::map<int,pvecint>& axsegcuts, std::map<Ra
                for (k = 0; k < affectedconnections.size(); k++) {
                   if (!m_removed[affectedconnections[k]]) {
                      pvecint& connections = m_axialconns[affectedconnections[k]].m_connections;
-                     size_t index = connections.searchindex(removeindex);
+                     size_t index = connections.searchindex(static_cast<int>(removeindex));
                      if (index != paftl::npos) {
                         connections.remove_at(index);
                      }
@@ -1273,7 +1268,7 @@ int ShapeGraphs::convertDrawingToAxial(Communicator *comm, const std::string& na
    }
 
    // create map layer...
-   int mapref = addMap(name,ShapeMap::AXIALMAP);
+   int mapref = static_cast<int>(addMap(name,ShapeMap::AXIALMAP));
    // we can stop here for all line axial map!
    ShapeGraph& usermap = tail();
 
@@ -1347,7 +1342,7 @@ int ShapeGraphs::convertDataToAxial(Communicator *comm, const std::string& name,
    }
 
    // create map layer...
-   int mapref = addMap(name,ShapeMap::AXIALMAP);
+   int mapref = static_cast<int>(addMap(name,ShapeMap::AXIALMAP));
    // we can stop here for all line axial map!
    ShapeGraph& usermap = tail();
 
@@ -1414,12 +1409,11 @@ int ShapeGraphs::convertDrawingToConvex(Communicator *comm, const std::string& n
    QtRegion region;
    pvecint polygon_refs;
 
-   int mapref = addMap(name,ShapeMap::CONVEXMAP);
+   int mapref = static_cast<int>(addMap(name,ShapeMap::CONVEXMAP));
    ShapeGraph& usermap = tail();
    int conn_col = usermap.m_attributes.insertLockedColumn("Connectivity");
 
    size_t count = 0;
-   size_t i = 0;
 
    for (const auto& pixelGroup: drawingFiles) {
       for (const auto& pixel: pixelGroup.m_spacePixels) {
@@ -1430,7 +1424,7 @@ int ShapeGraphs::convertDrawingToConvex(Communicator *comm, const std::string& n
                if (shape.isPolygon()) {
                   usermap.makeShape(shape);
                   usermap.m_connectors.push_back( Connector() );
-                  usermap.m_attributes.setValue(count,conn_col,0);
+                  usermap.m_attributes.setValue(static_cast<int>(count),conn_col,0);
                   count++;
                }
             }
@@ -1460,7 +1454,7 @@ int ShapeGraphs::convertDataToConvex(Communicator *comm, const std::string& name
 {
    pvecint polygon_refs;
 
-   int mapref = addMap(name,ShapeMap::CONVEXMAP);
+   int mapref = static_cast<int>(addMap(name,ShapeMap::CONVEXMAP));
    ShapeGraph& usermap = getMap(mapref);
    int conn_col = usermap.m_attributes.insertLockedColumn("Connectivity");
 
@@ -1568,7 +1562,7 @@ int ShapeGraphs::convertDrawingToSegment(Communicator *comm, const std::string& 
    }
 
    // create map layer...
-   int mapref = addMap(name,ShapeMap::SEGMENTMAP);
+   int mapref = static_cast<int>(addMap(name,ShapeMap::SEGMENTMAP));
    // we can stop here for all line axial map!
    ShapeGraph& usermap = tail();
 
@@ -1641,7 +1635,7 @@ int ShapeGraphs::convertDataToSegment(Communicator *comm, const std::string& nam
    }
 
    // create map layer...
-   int mapref = addMap(name,ShapeMap::SEGMENTMAP);
+   int mapref = static_cast<int>(addMap(name,ShapeMap::SEGMENTMAP));
 
    // note, I may need to reuse this:
    ShapeGraph& usermap = tail();
@@ -1728,7 +1722,7 @@ int ShapeGraphs::convertAxialToSegment(Communicator *comm, const std::string& na
    }
 
    // create map layer...
-   int mapref = addMap(name,ShapeMap::SEGMENTMAP);
+   int mapref = static_cast<int>(addMap(name,ShapeMap::SEGMENTMAP));
    ShapeGraph& segmap = getMap(mapref);
 
    segmap.init(lines.size(),dispmap.m_region);
@@ -1869,8 +1863,8 @@ void ShapeGraph::initialiseAttributesAxial()
 {
     m_attributes.clear();
     // note, expects these to be numbered 0, 1...
-    int conn_col = m_attributes.insertLockedColumn("Connectivity");
-    int leng_col = m_attributes.insertLockedColumn("Line Length");
+    m_attributes.insertLockedColumn("Connectivity");
+    m_attributes.insertLockedColumn("Line Length");
 
 }
 
@@ -1892,7 +1886,7 @@ void ShapeGraph::makeConnections(const prefvec<pvecint>& keyvertices)
       int rowid = m_attributes.getRowid(key);
       // all indices should match...
       m_connectors.push_back( Connector() );
-      int connectivity = getLineConnections( key, m_connectors[i].m_connections, TOLERANCE_B*__max(m_region.height(),m_region.width()));
+      size_t connectivity = getLineConnections( key, m_connectors[i].m_connections, TOLERANCE_B*__max(m_region.height(),m_region.width()));
       m_attributes.setValue(rowid, conn_col, (float) connectivity );
       m_attributes.setValue(rowid, leng_col, (float) shape.second.getLine().length() );
       if (keyvertices.size()) {
@@ -2000,14 +1994,14 @@ void ShapeGraph::makeDivisions(const prefvec<PolyConnector>& polyconnections, co
    time_t atime = 0;
    if (comm) {
       qtimer( atime, 0 );
-      comm->CommPostMessage( Communicator::NUM_RECORDS, polyconnections.size() );
+      comm->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>(polyconnections.size()) );
    }
 
    for (size_t i = 0; i < polyconnections.size(); i++) {
       PixelRefVector pixels = pixelateLine(polyconnections[i].line);
       pvecint testedshapes;
       auto connIter = radialdivisions.find(polyconnections[i].key);
-      size_t connindex = std::distance(radialdivisions.begin(), connIter);
+      int connindex = static_cast<int>(std::distance(radialdivisions.begin(), connIter));
       double tolerance = sqrt(TOLERANCE_A);// * polyconnections[i].line.length();
       for (size_t j = 0; j < pixels.size(); j++) {
          PixelRef pix = pixels[j];
@@ -2025,18 +2019,18 @@ void ShapeGraph::makeDivisions(const prefvec<PolyConnector>& polyconnections, co
                   break;
                case 2:
                   {
-                     size_t index = depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref);
-                     if (int(index) != shape.m_shape_ref) {
+                     int index = static_cast<int>(depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref));
+                     if (index != shape.m_shape_ref) {
                         throw 1; // for the code to work later this can't be true!
                      }
-                     axialdividers[index].add(connindex);
+                     axialdividers[int(index)].add(connindex);
                      connIter->second.add(shape.m_shape_ref);
                   }
                   break;
                case 1:
                   {
-                     size_t index = depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref);
-                     if (int(index) != shape.m_shape_ref) {
+                     int index = static_cast<int>(depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref));
+                     if (index != shape.m_shape_ref) {
                         throw 1; // for the code to work later this can't be true!
                      }
                      //
@@ -2058,7 +2052,7 @@ void ShapeGraph::makeDivisions(const prefvec<PolyConnector>& polyconnections, co
             if (comm->IsCancelled()) {
                throw Communicator::CancelledException();
             }
-            comm->CommPostMessage( Communicator::CURRENT_RECORD, i );
+            comm->CommPostMessage( Communicator::CURRENT_RECORD, static_cast<int>(i) );
          }
       }
    }
@@ -2075,7 +2069,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    time_t atime = 0;
    if (comm) {
       qtimer( atime, 0 );
-      comm->CommPostMessage( Communicator::NUM_RECORDS, m_connectors.size() );
+      comm->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>(m_connectors.size()) );
    }
 
    // note: radius must be sorted lowest to highest, but if -1 occurs ("radius n") it needs to be last...
@@ -2100,7 +2094,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    if (weighting_col != -1) {
       weighting_col_text = m_attributes.getColumnName(weighting_col);
       for (size_t i = 0; i < m_connectors.size(); i++) {
-         weights.push_back(m_attributes.getValue(i,weighting_col));
+         weights.push_back(m_attributes.getValue(static_cast<int>(i),weighting_col));
       }
    }
 
@@ -2275,7 +2269,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    // it's going to get worse...
 
    bool *covered = new bool [m_connectors.size()];
-   for (size_t i = 0; i < m_connectors.size(); i++) {
+   for (int i = 0; i < m_connectors.size(); i++) {
       for (size_t j = 0; j < m_connectors.size(); j++) {
          covered[j] = false;
       }
@@ -2294,7 +2288,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
             // n.b., as of Depthmap 10.0, connections[j] and i cannot coexist
             // if (connections[j] != i) {
                totalneighbourhood.add(connections[j]); // <- note add does nothing if member already exists
-               int intersect_size = 0, retro_size = 0;
+               int retro_size = 0;
                pvecint retconnectors = m_connectors[connections[j]].m_connections;
                for (size_t k = 0; k < retconnectors.size(); k++) {
                    retro_size++;
@@ -2318,7 +2312,6 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
 
       pvecint depthcounts;
       depthcounts.push_back(0);
-      Connector& thisline = m_connectors[i];
       pflipper<IntPairVector> foundlist;
       foundlist.a().push_back(IntPair(i,-1));
       covered[i] = true;
@@ -2342,7 +2335,6 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
                audittrail[index][0].previous.ref = previous; // note 0th member used here: can be used individually different radius previous
             }
             Connector& line = m_connectors[index];
-            double control = 0;
             for (size_t k = 0; k < line.m_connections.size(); k++) {
                if (!covered[line.m_connections[k]]) {
                   covered[line.m_connections[k]] = true;
@@ -2515,7 +2507,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    }
    delete [] covered;
    if (choice) {
-      for (size_t i = 0; i < m_connectors.size(); i++) {
+      for (int i = 0; i < m_connectors.size(); i++) {
          double total_choice = 0.0, w_total_choice = 0.0;
          for (size_t r = 0; r < radius.size(); r++) {
             total_choice += audittrail[i][r].choice;
@@ -2604,7 +2596,6 @@ bool ShapeGraph::read(std::istream &stream, int version )
    m_selection = false;
    m_map_type = ShapeMap::EMPTYMAP;
 
-   bool segmentmap = false;
    // note that keyvertexcount and keyvertices are different things! (length keyvertices not the same as keyvertexcount!)
    stream.read((char *)&m_keyvertexcount,sizeof(m_keyvertexcount));
    int size;
@@ -2693,7 +2684,7 @@ bool ShapeGraph::write( std::ofstream& stream, int version )
 {
    // note keyvertexcount and keyvertices are different things!  (length keyvertices not the same as keyvertexcount!)
    stream.write((char *)&m_keyvertexcount,sizeof(m_keyvertexcount));
-   int size = m_keyvertices.size();
+   int size = static_cast<int>(m_keyvertices.size());
    stream.write((char *)&size,sizeof(size));
    for (size_t i = 0; i < m_keyvertices.size(); i++) {
       m_keyvertices[i].write(stream);
@@ -2925,7 +2916,7 @@ void ShapeGraph::makeSegmentMap(std::vector<Line>& lineset, prefvec<Connector>& 
    // this code relies on the polygon order being the same as the connections
 
    auto iter = m_shapes.begin();
-   for (size_t i = 0; i < m_connectors.size(); i++) {
+   for (int i = 0; i < m_connectors.size(); i++) {
       auto shape = iter->second;
       iter++;
       if (!shape.isLine()) {
@@ -2974,8 +2965,8 @@ void ShapeGraph::makeSegmentMap(std::vector<Line>& lineset, prefvec<Connector>& 
             else  {
                Line segment_a(line.start(),thispoint);
                lineset.push_back(segment_a);
-               connectionset.push_back(Connector(i));
-               seg_a = lineset.size() - 1;
+               connectionset.push_back(Connector(static_cast<int>(i)));
+               seg_a = static_cast<int>(lineset.size()) - 1;
             }
             lastpoint = thispoint;
          }
@@ -2999,15 +2990,15 @@ void ShapeGraph::makeSegmentMap(std::vector<Line>& lineset, prefvec<Connector>& 
             }
             Line segment_b(lastpoint,thispoint);
             lineset.push_back(segment_b);
-            connectionset.push_back(Connector(i));
-            seg_b = lineset.size() - 1;
+            connectionset.push_back(Connector(static_cast<int>(i)));
+            seg_b = static_cast<int>(lineset.size()) - 1;
             //
             lastpoint = thispoint;
          }
          //
          for (size_t j = 0; j < keylist.size(); j++) {
          //
-            if (keylist[j] < (int)i) {
+            if (keylist[j] < i) {
                // other line already segmented, look up in segment list,
                // and join segments together nicely
                auto segIter = segmentlist.find(OrderedIntPair(keylist[j],i));
@@ -3157,7 +3148,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
    time_t atime = 0;
    if (comm) {
       qtimer( atime, 0 );
-      comm->CommPostMessage( Communicator::NUM_RECORDS, m_connectors.size() );
+      comm->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>(m_connectors.size()) );
    }
 
    // note: radius must be sorted lowest to highest, but if -1 occurs ("radius n") it needs to be last...
@@ -3201,13 +3192,12 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
 
 
    bool *covered = new bool [m_connectors.size()];
-   for (size_t i = 0; i < m_connectors.size(); i++) {
+   for (int i = 0; i < m_connectors.size(); i++) {
       for (size_t j = 0; j < m_connectors.size(); j++) {
          covered[j] = false;
       }
       pmap<float,SegmentData> anglebins;
-      anglebins.add(0.0f,SegmentData(0,i,SegmentRef(),0,0.0,0));
-      Connector& thisline = m_connectors[i];
+      anglebins.add(0.0f,SegmentData(0,static_cast<int>(i),SegmentRef(),0,0.0,0));
       pvecdouble total_depth;
       pvecint node_count;
       size_t r;
@@ -3308,7 +3298,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
 
    if (comm) {
       qtimer( atime, 0 );
-      comm->CommPostMessage( Communicator::NUM_RECORDS, (selection_only ? m_selection_set.size() : m_connectors.size()) );
+      comm->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>((selection_only ? m_selection_set.size() : m_connectors.size())) );
    }
 
    // note: radius must be sorted lowest to highest, but if -1 occurs ("radius n") it needs to be last...
@@ -3335,7 +3325,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    if (weighting_col != -1) {
       weighting_col_text = m_attributes.getColumnName(weighting_col);
       for (size_t i = 0; i < m_connectors.size(); i++) {
-         weights.push_back(m_attributes.getValue(i,weighting_col));
+         weights.push_back(m_attributes.getValue(static_cast<int>(i),weighting_col));
       }
    }
    else { // Normal run // TV
@@ -3350,7 +3340,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
       double max_value = m_attributes.getMaxValue(routeweight_col);
      routeweight_col_text = m_attributes.getColumnName(routeweight_col);
       for (size_t i = 0; i < m_connectors.size(); i++) {
-         routeweights.push_back(1.0-(m_attributes.getValue(i, routeweight_col)/max_value)); //scale and revert!
+         routeweights.push_back(1.0-(m_attributes.getValue(static_cast<int>(i), routeweight_col)/max_value)); //scale and revert!
       }
    }
    else { // Normal run // TV
@@ -3367,7 +3357,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    if (weighting_col2 != -1) {
       weighting_col_text2 = m_attributes.getColumnName(weighting_col2);
       for (size_t i = 0; i < m_connectors.size(); i++) {
-         weights2.push_back(m_attributes.getValue(i,weighting_col2));
+         weights2.push_back(m_attributes.getValue(static_cast<int>(i),weighting_col2));
       }
    }
    else { // Normal run // TV
@@ -3383,7 +3373,6 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    size_t r;
    for (r = 0; r < radius_unconverted.size(); r++) {
       std::string radius_text = makeRadiusText(radius_type, radius_unconverted[r]);
-      int choice_col = -1, n_choice_col = -1, w_choice_col = -1, nw_choice_col = -1;
       if (choice) {
             //EF routeweight *
             if (routeweight_col != -1) {
@@ -3570,11 +3559,11 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    pvecfloat lengths;
    if (length_col != -1) {
       for (size_t i = 0; i < m_connectors.size(); i++) {
-         lengths.push_back(m_attributes.getValue(i,length_col));
+         lengths.push_back(m_attributes.getValue(static_cast<int>(i),length_col));
       }
    }
 
-   int radiussize = radius.size();
+   size_t radiussize = radius.size();
    int radiusmask = 0;
    for (int i = 0; i < radiussize; i++) {
       radiusmask |= (1 << i);
@@ -3586,7 +3575,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
          // could use m_selection_set.searchindex(rowid) to find
          // if this row is selected as m_selection_set is ordered for axial and segment maps, etc
          // BUT, actually quicker to check the tag in the attributes that shows it's selected
-         if (!m_attributes.isSelected(rowid)) {
+         if (!m_attributes.isSelected(static_cast<int>(rowid))) {
             continue;
          }
       }
@@ -3603,20 +3592,15 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
          }
       }
 
-      double rootseglength = m_attributes.getValue(rowid,length_col);
+      double rootseglength = m_attributes.getValue(static_cast<int>(rowid),length_col);
       double rootweight = (weighting_col != -1) ? weights[rowid] : 0.0;
-        //EFEF
-        double rootweight2 = (weighting_col2 != -1) ? weights2[rowid] : 0.0;
-        //EFEF
 
       // setup: direction 0 (both ways), segment i, previous -1, segdepth (step depth) 0, metricdepth 0.5 * rootseglength, bin 0
-      bins[0].add(SegmentData(0,rowid,SegmentRef(),0,0.5*rootseglength,radiusmask));
+      bins[0].add(SegmentData(0,static_cast<int>(rowid),SegmentRef(),0,0.5*rootseglength,radiusmask));
       // this version below is only designed to be used temporarily --
       // could be on an option?
       //bins[0].push_back(SegmentData(0,rowid,SegmentRef(),0,0.0,radiusmask));
-      Connector& thisline = m_connectors[rowid];
       pvecint node_count;
-      double weight = 0.0;
       int depthlevel = 0;
       int opencount = 1;
       int currentbin = 0;
@@ -3775,7 +3759,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
                //
                if (choice && audittrail[j][k][dir].leaf) {
                   // note, graph may be directed (e.g., for one way streets), so both ways must be included from now on:
-                  SegmentRef here = SegmentRef(dir == 0 ? 1 : -1,j);
+                  SegmentRef here = SegmentRef(dir == 0 ? 1 : -1,static_cast<int>(j));
                   if (here.ref != rowid) {
                      int choicecount = 0;
                      double choiceweight = 0.0;
@@ -3832,33 +3816,33 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
          double total_depth_conv = curs_total_depth / ((tulip_bins - 1.0f) * 0.5f);
          double total_weighted_depth_conv = curs_total_weighted_depth / ((tulip_bins - 1.0f) * 0.5f);
          //
-         m_attributes.setValue(rowid,count_col[k],float(curs_node_count));
+         m_attributes.setValue(static_cast<int>(rowid),count_col[k],float(curs_node_count));
          if (curs_node_count > 1) {
             // for dmap 8 and above, mean depth simply isn't calculated as for radius measures it is meaningless
-            m_attributes.setValue(rowid,td_col[k],total_depth_conv);
+            m_attributes.setValue(static_cast<int>(rowid),td_col[k],total_depth_conv);
             if (weighting_col != -1) {
-               m_attributes.setValue(rowid,total_weight_col[k],float(curs_total_weight));
-               m_attributes.setValue(rowid,w_td_col[k],float(total_weighted_depth_conv));
+               m_attributes.setValue(static_cast<int>(rowid),total_weight_col[k],float(curs_total_weight));
+               m_attributes.setValue(static_cast<int>(rowid),w_td_col[k],float(total_weighted_depth_conv));
             }
          }
          else {
-            m_attributes.setValue(rowid,td_col[k],-1);
+            m_attributes.setValue(static_cast<int>(rowid),td_col[k],-1);
             if (weighting_col != -1) {
-               m_attributes.setValue(rowid,total_weight_col[k],-1.0f);
-               m_attributes.setValue(rowid,w_td_col[k],-1.0f);
+               m_attributes.setValue(static_cast<int>(rowid),total_weight_col[k],-1.0f);
+               m_attributes.setValue(static_cast<int>(rowid),w_td_col[k],-1.0f);
             }
          }
          // for dmap 10 an above, integration is included!
          if (total_depth_conv > 1e-9) {
-            m_attributes.setValue(rowid,integ_col[k],(float)(curs_node_count*curs_node_count/total_depth_conv));
+            m_attributes.setValue(static_cast<int>(rowid),integ_col[k],(float)(curs_node_count*curs_node_count/total_depth_conv));
             if (weighting_col != -1) {
-               m_attributes.setValue(rowid,w_integ_col[k],(float)(curs_total_weight*curs_total_weight/total_weighted_depth_conv));
+               m_attributes.setValue(static_cast<int>(rowid),w_integ_col[k],(float)(curs_total_weight*curs_total_weight/total_weighted_depth_conv));
             }
          }
          else {
-            m_attributes.setValue(rowid,integ_col[k],-1);
+            m_attributes.setValue(static_cast<int>(rowid),integ_col[k],-1);
             if (weighting_col != -1) {
-               m_attributes.setValue(rowid,w_integ_col[k],-1.0f);
+               m_attributes.setValue(static_cast<int>(rowid),w_integ_col[k],-1.0f);
             }
          }
       }
@@ -3887,7 +3871,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
                   break;
                }
             }
-            comm->CommPostMessage( Communicator::CURRENT_RECORD, rowid );
+            comm->CommPostMessage( Communicator::CURRENT_RECORD, static_cast<int>(rowid) );
          }
       }
    }
@@ -3910,12 +3894,12 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
             // again, drop the divide by 2 for the new implementation
             //
             //
-            m_attributes.setValue(rowid,choice_col[r],float(total_choice));
+            m_attributes.setValue(static_cast<int>(rowid),choice_col[r],float(total_choice));
             if (weighting_col != -1) {
-               m_attributes.setValue(rowid,w_choice_col[r],float(total_weighted_choice));
+               m_attributes.setValue(static_cast<int>(rowid),w_choice_col[r],float(total_weighted_choice));
                     //EFEF*
                     if (weighting_col2 != -1) {
-                        m_attributes.setValue(rowid,w_choice_col2[r],float(total_weighted_choice2));
+                        m_attributes.setValue(static_cast<int>(rowid),w_choice_col2[r],float(total_weighted_choice2));
                     }
                     //*EFEF
                 }
@@ -4049,7 +4033,7 @@ void TidyLines::tidy(std::vector<Line>& lines, const QtRegion& region)
    {return line.length() < maxdim * TOLERANCE_B;}), lines.end());
 
    // now load up m_lines...
-   initLines(lines.size(),m_region.bottom_left,m_region.top_right);
+   initLines(static_cast<int>(lines.size()),m_region.bottom_left,m_region.top_right);
    for (auto& line: lines) {
       addLine(line);
    }
@@ -4060,8 +4044,8 @@ void TidyLines::tidy(std::vector<Line>& lines, const QtRegion& region)
       // n.b., as m_lines have just been made, note that what's in m_lines matches whats in lines
       // we will use this later!
       m_test++;
-      m_lines[i].test = m_test;
-      PixelRefVector list = pixelateLine( m_lines[i].line );
+      m_lines[static_cast<int>(i)].test = m_test;
+      PixelRefVector list = pixelateLine( m_lines[static_cast<int>(i)].line );
       for (size_t a = 0; a < list.size(); a++) {
          for (size_t b = 0; b < m_pixel_lines[ list[a].x ][ list[a].y ].size(); b++) {
             int j = m_pixel_lines[ list[a].x ][ list[a].y ][b];
@@ -4076,20 +4060,20 @@ void TidyLines::tidy(std::vector<Line>& lines, const QtRegion& region)
                   int parity = (axis_i == XAXIS) ? 1 : lines[i].sign();
                   if ((lines[i].start()[axis_i] * parity + TOLERANCE_B * maxdim) > (lines[j].start()[axis_j] * parity) &&
                       (lines[i].start()[axis_i] * parity) < (lines[j].end()[axis_j] * parity + TOLERANCE_B * maxdim)) {
-                     int end = ((lines[i].end()[axis_i] * parity) > (lines[j].end()[axis_j] * parity)) ? i : j;
+                     int end = ((lines[static_cast<int>(i)].end()[axis_i] * parity) > (lines[static_cast<int>(j)].end()[axis_j] * parity)) ? static_cast<int>(i) : static_cast<int>(j);
                      lines[j].bx() = lines[end].bx();
                      lines[j].by() = lines[end].by();
-                     removelist.push_back(i);
+                     removelist.push_back(static_cast<int>(i));
                      continue; // <- don't do this any more, we've zapped it and replaced it with the later line
                   }
                   if ((lines[j].start()[axis_j] * parity + TOLERANCE_B * maxdim) > (lines[i].start()[axis_i] * parity) &&
                       (lines[j].start()[axis_j] * parity) < (lines[i].end()[axis_i]  * parity + TOLERANCE_B * maxdim)) {
-                     int end = ((lines[i].end()[axis_i] * parity) > (lines[j].end()[axis_j] * parity)) ? i : j;
+                     int end = ((lines[static_cast<int>(i)].end()[axis_i] * parity) > (lines[static_cast<int>(j)].end()[axis_j] * parity)) ? static_cast<int>(i) : static_cast<int>(j);
                      lines[j].ax() = lines[i].ax();
                      lines[j].ay() = lines[i].ay();
                      lines[j].bx() = lines[end].bx();
                      lines[j].by() = lines[end].by();
-                     removelist.push_back(i);
+                     removelist.push_back(static_cast<int>(i));
                      continue; // <- don't do this any more, we've zapped it and replaced it with the later line
                   }
                }
@@ -4129,7 +4113,7 @@ void TidyLines::quicktidy(std::map<int,Line>& lines, const QtRegion& region)
    }
 
    // now load up m_lines...
-   initLines(lines.size(),m_region.bottom_left,m_region.top_right);
+   initLines(static_cast<int>(lines.size()),m_region.bottom_left,m_region.top_right);
    for (auto line: lines) {
       addLine(line.second);
    }

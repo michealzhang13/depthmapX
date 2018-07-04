@@ -187,7 +187,7 @@ class ShapeGraph : public ShapeMap
    friend class MapInfoData;
 protected:
    prefvec<pvecint> m_keyvertices;       // but still need to return keyvertices here
-   int m_keyvertexcount;
+   size_t m_keyvertexcount;
 protected:
 public:
    bool outputMifPolygons(std::ostream& miffile, std::ostream& midfile) const;
@@ -284,7 +284,7 @@ protected:
    int *m_keyvertexcounts;
    std::vector<Connector> m_axialconns; // <- uses a copy of axial lines as it will remove connections
 public:
-   AxialMinimiser(const ShapeGraph& alllinemap, int no_of_axsegcuts, int no_of_radialsegs);
+   AxialMinimiser(const ShapeGraph& alllinemap, size_t no_of_axsegcuts, size_t no_of_radialsegs);
    ~AxialMinimiser();
    void removeSubsets(std::map<int,pvecint>& axsegcuts, std::map<RadialKey,RadialSegment>& radialsegs, std::map<RadialKey,pvecint>& rlds, pqvector<RadialLine>& radial_lines, prefvec<pvecint>& keyvertexconns, int *keyvertexcounts);
    void fewestLongest(std::map<int,pvecint>& axsegcuts, std::map<RadialKey,RadialSegment>& radialsegs, std::map<RadialKey,pvecint>& rlds, pqvector<RadialLine>& radial_lines, prefvec<pvecint>& keyvertexconns, int *keyvertexcounts);

@@ -61,7 +61,7 @@ bool ShapeGraph::readold( std::ifstream& stream, int version )
    m_name = linemap.getName();
 
    // now copy to new base class:
-   init(lines.size(),linemap.getRegion());
+   init(static_cast<int>(lines.size()),linemap.getRegion());
    for (size_t i = 0; i < lines.size(); i++) {
       makeLineShape(lines[i].line);
    }
@@ -147,10 +147,10 @@ bool ShapeGraphs::read( std::ifstream& stream, int version )
    // this is an index to look up the all line map, used by UI to determine if can make fewest line map
    // note: it is not saved for historical reasons
    // will get confused by more than one all line map
-   m_all_line_map = getMapRef("All-Line Map");
+   m_all_line_map = static_cast<int>(getMapRef("All-Line Map"));
    if (m_all_line_map == -1) {
       // used to be called All Line Map
-      m_all_line_map = getMapRef("All Line Map");
+      m_all_line_map = static_cast<int>(getMapRef("All Line Map"));
    }
    if (m_all_line_map != -1) {
       at(m_all_line_map).m_map_type = ShapeMap::ALLLINEMAP;
@@ -195,7 +195,7 @@ bool ShapeGraph::write( std::ostream& stream, int version )
 {
    // note keyvertexcount and keyvertices are different things!  (length keyvertices not the same as keyvertexcount!)
    stream.write((char *)&m_keyvertexcount,sizeof(m_keyvertexcount));
-   int size = m_keyvertices.size();
+   int size = static_cast<int>(m_keyvertices.size());
    stream.write((char *)&size,sizeof(size));
    for (size_t i = 0; i < m_keyvertices.size(); i++) {
       m_keyvertices[i].write(stream);

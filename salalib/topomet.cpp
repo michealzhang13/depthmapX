@@ -36,7 +36,7 @@ bool ShapeGraph::analyseTopoMet(Communicator *comm, int analysis_type, double ra
 
    if (comm) {
       qtimer( atime, 0 );
-      comm->CommPostMessage( Communicator::NUM_RECORDS, (sel_only ? m_selection_set.size() : m_connectors.size()) );
+      comm->CommPostMessage( Communicator::NUM_RECORDS, static_cast<int>(sel_only ? m_selection_set.size() : m_connectors.size()) );
    }
    int reccount = 0;
 
@@ -47,8 +47,8 @@ bool ShapeGraph::analyseTopoMet(Communicator *comm, int analysis_type, double ra
    float maxseglength = 0.0f;
    for (size_t cursor = 0; cursor < getShapeCount(); cursor++)
    {
-      axialrefs.push_back(m_attributes.getValue(cursor,"Axial Line Ref"));
-      seglengths.push_back(m_attributes.getValue(cursor,"Segment Length"));
+      axialrefs.push_back(m_attributes.getValue(static_cast<int>(cursor),"Axial Line Ref"));
+      seglengths.push_back(m_attributes.getValue(static_cast<int>(cursor),"Segment Length"));
       if (seglengths.tail() > maxseglength) {
          maxseglength = seglengths.tail();
       }
@@ -90,7 +90,7 @@ bool ShapeGraph::analyseTopoMet(Communicator *comm, int analysis_type, double ra
    TopoMetSegmentChoice *choicevals = new TopoMetSegmentChoice[getShapeCount()];
    for (size_t cursor = 0; cursor < getShapeCount(); cursor++)
    {
-      if (sel_only && !m_attributes.isSelected(cursor)) {
+      if (sel_only && !m_attributes.isSelected(static_cast<int>(cursor))) {
          continue;
       }
       for (size_t i = 0; i < getShapeCount(); i++) {
@@ -98,12 +98,12 @@ bool ShapeGraph::analyseTopoMet(Communicator *comm, int analysis_type, double ra
       }
       pvecint list[512]; // 512 bins!
       int bin = 0;
-      list[bin].push_back(cursor);
+      list[bin].push_back(static_cast<int>(cursor));
       double rootseglength = seglengths[cursor];
-      audittrail[cursor] = TopoMetSegmentRef(cursor,Connector::SEG_CONN_ALL,rootseglength*0.5,-1);
+      audittrail[cursor] = TopoMetSegmentRef(static_cast<int>(cursor),Connector::SEG_CONN_ALL,rootseglength*0.5,-1);
       int open = 1;
       unsigned int segdepth = 0;
-      double metdepth = 0.0, total = 0.0, wtotal = 0.0, wtotaldepth = 0.0, totalsegdepth = 0.0, totalmetdepth = 0.0;
+      double total = 0.0, wtotal = 0.0, wtotaldepth = 0.0, totalsegdepth = 0.0, totalmetdepth = 0.0;
       while (open != 0) {
          while (list[bin].size() == 0) {
             bin++;
@@ -187,16 +187,16 @@ bool ShapeGraph::analyseTopoMet(Communicator *comm, int analysis_type, double ra
       // also put in mean depth:
       //
       if (analysis_type == TOPOMET_METHOD_METRIC) {
-         m_attributes.setValue(cursor,meandepthcol.c_str(),totalmetdepth/(total-1));
-         m_attributes.setValue(cursor,totaldcol.c_str(),totalmetdepth);
+         m_attributes.setValue(static_cast<int>(cursor),meandepthcol.c_str(),totalmetdepth/(total-1));
+         m_attributes.setValue(static_cast<int>(cursor),totaldcol.c_str(),totalmetdepth);
       }
       else {
-         m_attributes.setValue(cursor,meandepthcol.c_str(),totalsegdepth/(total-1));
-         m_attributes.setValue(cursor,totaldcol.c_str(),totalsegdepth);
+         m_attributes.setValue(static_cast<int>(cursor),meandepthcol.c_str(),totalsegdepth/(total-1));
+         m_attributes.setValue(static_cast<int>(cursor),totaldcol.c_str(),totalsegdepth);
       }
-      m_attributes.setValue(cursor,wmeandepthcol.c_str(),wtotaldepth/(wtotal-rootseglength));
-      m_attributes.setValue(cursor,totalcol.c_str(),total);
-      m_attributes.setValue(cursor,wtotalcol.c_str(),wtotal);
+      m_attributes.setValue(static_cast<int>(cursor),wmeandepthcol.c_str(),wtotaldepth/(wtotal-rootseglength));
+      m_attributes.setValue(static_cast<int>(cursor),totalcol.c_str(),total);
+      m_attributes.setValue(static_cast<int>(cursor),wtotalcol.c_str(),wtotal);
       //
       if (comm) {
          if (qtimer( atime, 500 )) {
@@ -215,8 +215,8 @@ bool ShapeGraph::analyseTopoMet(Communicator *comm, int analysis_type, double ra
       // note, I've stopped sel only from calculating choice values:
       for (size_t cursor = 0; cursor < getShapeCount(); cursor++)
       {
-         m_attributes.setValue(cursor,choicecol.c_str(),choicevals[cursor].choice);
-         m_attributes.setValue(cursor,wchoicecol.c_str(),choicevals[cursor].wchoice);
+         m_attributes.setValue(static_cast<int>(cursor),choicecol.c_str(),choicevals[cursor].choice);
+         m_attributes.setValue(static_cast<int>(cursor),wchoicecol.c_str(),choicevals[cursor].wchoice);
       }
    }
    delete [] seen;
@@ -244,8 +244,8 @@ bool ShapeGraph::analyseTopoMetPD(Communicator *comm, int analysis_type)
    float maxseglength = 0.0f;
    for (size_t cursor = 0; cursor < getShapeCount(); cursor++)
    {
-      axialrefs.push_back(m_attributes.getValue(cursor,"Axial Line Ref"));
-      seglengths.push_back(m_attributes.getValue(cursor,"Segment Length"));
+      axialrefs.push_back(m_attributes.getValue(static_cast<int>(cursor),"Axial Line Ref"));
+      seglengths.push_back(m_attributes.getValue(static_cast<int>(cursor),"Segment Length"));
       if (seglengths.tail() > maxseglength) {
          maxseglength = seglengths.tail();
       }
@@ -313,7 +313,6 @@ bool ShapeGraph::analyseTopoMetPD(Communicator *comm, int analysis_type)
          here.done = true;
       }
       //
-      double len = seglengths[here.ref];
       Connector& axline = m_connectors.at(here.ref);
       axline.first();
       int connected_cursor = -1;

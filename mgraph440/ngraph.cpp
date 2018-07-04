@@ -92,7 +92,7 @@ void Bin::make(const PixelRefVector& pixels, char dir)
          m_length = 1;
          m_pixel_vecs = new PixelVec[1];
          m_pixel_vecs[0] = cur;
-         m_node_count = pixels.size();
+         m_node_count = static_cast<unsigned short>(pixels.size());
       }
       else {
          prefvec<PixelVec> pixel_vecs;
@@ -129,12 +129,12 @@ void Bin::make(const PixelRefVector& pixels, char dir)
          }
 
          // Now compact the representation:
-         m_length = pixel_vecs.size();
+         m_length = static_cast<unsigned short>(pixel_vecs.size());
          m_pixel_vecs = new PixelVec[m_length];
          for (int k = 0; k < m_length; k++) {
             m_pixel_vecs[k] = pixel_vecs[k];
          }
-         m_node_count = pixels.size();
+         m_node_count = static_cast<unsigned short>(pixels.size());
       }
    }
 }

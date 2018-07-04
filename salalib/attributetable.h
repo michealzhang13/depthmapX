@@ -605,7 +605,7 @@ namespace dXreimpl
     }
 
     template<typename RowKeyType>
-    void AttributeTable<RowKeyType>::read(std::istream &stream, LayerManager &layerManager, int version)
+    void AttributeTable<RowKeyType>::read(std::istream &stream, LayerManager &layerManager, int)
     {
         layerManager.read(stream);
         int colcount;

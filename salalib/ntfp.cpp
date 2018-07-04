@@ -198,7 +198,7 @@ void NtfMap::open(const std::vector<std::string>& fileset, Communicator *comm)
                   if (pos != paftl::npos) {
                      at(pos).push_back( NtfGeometry() );
                      parsing = 1;
-                     currpos = pos;
+                     currpos = static_cast<int>(pos);
                   }
                }
                else if (filetype == NTF_MERIDIAN) {
@@ -233,7 +233,7 @@ void NtfMap::open(const std::vector<std::string>& fileset, Communicator *comm)
                      std::string featcodestr = line.substr(25,4);
                      size_t pos = featcodes.searchindex( stoi(featcodestr) );
                      if (pos != std::string::npos) {
-                        addGeom(pos,geom);
+                        addGeom(static_cast<int>(pos),geom);
                      }
                   }
                   parsing = 0;

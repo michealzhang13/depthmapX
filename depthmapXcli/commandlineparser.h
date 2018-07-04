@@ -29,7 +29,7 @@ class CommandLineParser
 {
 public:
     CommandLineParser(const IModeParserFactory &parserFactory);
-    void parse(size_t argc, char *argv[]);
+    void parse(int argc, char *argv[]);
 
     const std::string &getFileName() const { return _fileName; }
     const std::string &getOuputFile() const {return _outputFile;}

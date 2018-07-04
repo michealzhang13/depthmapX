@@ -121,7 +121,7 @@ bool SpacePixelGroup<T>::write( std::ostream& stream, int version )
    stream.write( (char *) &m_region, sizeof(m_region) );
 
    // Quick mod - TV
-   int count = prefvec<T>::size();
+   int count = static_cast<int>(prefvec<T>::size());
    stream.write( (char *) &count, sizeof(count) );
    for (int i = 0; i < count; i++) {
       prefvec<T>::at(i).write(stream,version);

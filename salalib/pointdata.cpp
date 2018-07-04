@@ -268,8 +268,6 @@ bool PointMap::blockLines()
    // just ensure lines don't exist to start off with (e.g., if someone's been playing with the visible layers)
    unblockLines();
 
-   size_t count = 0;
-
    // This used to use a packed Linekey (file, layer, line), but
    // would require a key with (file, layer, shaperef, seg) when used with shaperef,
    // so just switched to an integer key:
@@ -660,7 +658,6 @@ void PointMap::outputBinSummaries(std::ostream& myout)
    }
    myout << std::endl;
 
-   int count = 0;
    for (int i = 0; i < m_cols; i++) {
       for (int j = 0; j < m_rows; j++) {
 
@@ -1040,7 +1037,7 @@ bool PointMap::read(std::istream& stream, int version )
               m_bottom_left.y+double(m_rows-1)*m_spacing + m_spacing/2.0) );
 
    // for old data versions:
-   int attr_count = -1, which_attributes = -1;
+   int attr_count = -1;
 
    int displayed_attribute;  // n.b., temp variable necessary to force recalc below
 
@@ -1293,7 +1290,6 @@ bool PointMap::sparkPixel2(PixelRef curs, int make, double maxdist)
       far_bin_dists[i] = 0.0f;
    }
    int neighbourhood_size = 0;
-   int max_depth = 0;
    double total_dist = 0.0;
    double total_dist_sqr = 0.0;
 
@@ -1488,8 +1484,6 @@ bool PointMap::binDisplay(Communicator *comm)
    for (auto& sel: m_selection_set) {
       Point& p = getPoint(sel);
       // Code for colouring pretty bins:
-      int count = 1;
-      int dir = 0;
       for (int i = 0; i < 32; i++) {
          Bin& b = p.m_node->bin(i);
          b.first();
@@ -1548,7 +1542,7 @@ bool PointMap::analyseIsovist(Communicator *comm, MetaGraph& mgraph, bool simple
             size_t k;
             for (k = 0; k < 32; k++) {
                occ[k].clear();
-               node.bin(k).setOccDistance(0.0f);
+               node.bin(static_cast<int>(k)).setOccDistance(0.0f);
             }
             for (k = 0; k < isovist.getOcclusionPoints().size(); k++) {
                const PointDist& pointdist = isovist.getOcclusionPoints().at(k);
@@ -1956,7 +1950,6 @@ bool PointMap::analyseMetric(Communicator *comm, Options& options)
 
             std::set<MetricTriple> search_list;
             search_list.insert(MetricTriple(0.0f,curs,NoPixel));
-            int level = 0;
             while (search_list.size()) {
                std::set<MetricTriple>::iterator it = search_list.begin();
                MetricTriple here = *it;
@@ -2036,8 +2029,6 @@ bool PointMap::analyseMetricPointDepth(Communicator *comm)
 
    // note that m_misc is used in a different manner to analyseGraph / PointDepth
    // here it marks the node as used in calculation only
-   int count = 0;
-   int level = 0;
    while (search_list.size()) {
       std::set<MetricTriple>::iterator it = search_list.begin();
       MetricTriple here = *it;
@@ -2141,7 +2132,6 @@ bool PointMap::analyseAngular(Communicator *comm, Options& options)
             std::set<AngularTriple> search_list;
             search_list.insert(AngularTriple(0.0f,curs,NoPixel));
             getPoint(curs).m_cumangle = 0.0f;
-            int level = 0;
             while (search_list.size()) {
                std::set<AngularTriple>::iterator it = search_list.begin();
                AngularTriple here = *it;
@@ -2214,8 +2204,6 @@ bool PointMap::analyseAngularPointDepth(Communicator *comm)
 
    // note that m_misc is used in a different manner to analyseGraph / PointDepth
    // here it marks the node as used in calculation only
-   int count = 0;
-   int level = 0;
    while (search_list.size()) {
       std::set<AngularTriple>::iterator it = search_list.begin();
       AngularTriple here = *it;

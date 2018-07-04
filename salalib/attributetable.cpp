@@ -83,7 +83,7 @@ void dXreimpl::AttributeColumnImpl::setName(const std::string &name)
     m_name = name;
 }
 
-size_t dXreimpl::AttributeColumnImpl::read(std::istream &stream, int version)
+size_t dXreimpl::AttributeColumnImpl::read(std::istream &stream, int )
 {
     m_name = dXstring::readString(stream);
     float val;
@@ -182,7 +182,7 @@ void dXreimpl::AttributeRowImpl::removeColumn(size_t index)
     m_data.erase(m_data.begin() + index);
 }
 
-void dXreimpl::AttributeRowImpl::read(std::istream &stream, int version)
+void dXreimpl::AttributeRowImpl::read(std::istream &stream, int )
 {
     stream.read((char *)&m_layerKey, sizeof(m_layerKey));
     dXvector::readIntoVector(stream, m_data);

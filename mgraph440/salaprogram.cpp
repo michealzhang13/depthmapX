@@ -418,7 +418,6 @@ int SalaCommand::parse(std::istream& program, int line)
    int last = SP_FUNCTION;
    bool endloop = false;
    bool overridecache = false;
-   bool firstword = true;
    SalaBuffer buffer;
    char cache = ' ';
    //
@@ -714,7 +713,7 @@ int SalaCommand::parse(std::istream& program, int line)
             }
             // add the for iterator variable:
             m_program->m_var_stack.push_back(SalaObj());
-            int x = m_program->m_var_stack.size() - 1;
+            int x = static_cast<int>(m_program->m_var_stack.size()) - 1;
             m_var_names.add(buffer,x);
             m_for_iter = SalaObj( SalaObj::S_VAR, x);
             // now check for 'in'
@@ -903,7 +902,7 @@ int SalaCommand::decode(std::string string)   // string copied as makelower appl
             }
             else {
                m_program->m_var_stack.push_back(SalaObj());
-               x = m_program->m_var_stack.size() - 1;
+               x = static_cast<int>(m_program->m_var_stack.size()) - 1;
                // note: attach simply to your m_parent, not parent variable, which has walked up the stack
                m_parent->m_var_names.add(string,x);
                m_eval_stack.push_back( SalaObj( SalaObj::S_VAR, x) );
@@ -1015,7 +1014,7 @@ void SalaCommand::pushFunc(const SalaObj& func)
 
 void SalaCommand::evaluate(SalaObj& obj, bool& ret, bool& ifhandled)
 {
-   int begin = m_eval_stack.size()-1;
+   int begin = static_cast<int>(m_eval_stack.size())-1;
    SalaObj *p_obj = NULL;
    switch (m_command) {
    case SC_EXPR:
@@ -1077,7 +1076,7 @@ void SalaCommand::evaluate(SalaObj& obj, bool& ret, bool& ifhandled)
          // eventually I'd like to do this with generators / iterators rather than constructing a list each time
          SalaObj list = evaluate(begin,p_obj);
          if (list.type == SalaObj::S_LIST) {
-            int len = list.data.list.list->size();
+            int len = static_cast<int>(list.data.list.list->size());
             if (len != 0) {
                for (int i = 0; i < len; i++) {
                   // reset all my stack (actually, all parent functions should do this!)
@@ -1118,7 +1117,7 @@ void SalaCommand::evaluate(SalaObj& obj, bool& ret, bool& ifhandled)
             if (++counter == 0x04000000) { // <- an arbitrary big number
                throw SalaError("Infinite loop",m_line);
             }
-            begin = m_eval_stack.size()-1;
+            begin = static_cast<int>(m_eval_stack.size())-1;
          }
          if (counter) {
             ifhandled = true;
@@ -1483,7 +1482,7 @@ SalaObj SalaCommand::evaluate(int& pointer, SalaObj* &p_obj)
                   break;
                case SalaObj::S_FEXTEND:
                   if (param.type & SalaObj::S_LIST) {
-                     int count = param.data.list.list->size();
+                     int count = static_cast<int>(param.data.list.list->size());
                      for (int i = 0; i < count; i++) {
                         obj.data.list.list->push_back(param.data.list.list->at(i));
                      }
@@ -1505,7 +1504,7 @@ SalaObj SalaCommand::evaluate(int& pointer, SalaObj* &p_obj)
                      pvector<SalaObj>& list = *(obj.data.list.list);
                      int i = param.toInt();
                      if (i < 0)
-                        i += list.size();
+                        i += static_cast<int>(list.size());
                      if (i < 0 || i >= (int)list.size())
                         throw SalaError("Index out of range");
                      data = list.at(i);
@@ -1679,7 +1678,7 @@ SalaObj SalaCommand::connections(SalaObj graphobj, SalaObj param)
       else {
          param.ensureNone();
       }
-      int count = connector.count(mode);
+      int count = static_cast<int>(connector.count(mode));
       list = SalaObj( SalaObj::S_LIST, count);
       connector.first();
       for (int i = 0; i < count; i++) {

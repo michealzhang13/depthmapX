@@ -202,31 +202,31 @@ public:
    //
    ShapeGraph& getDisplayedShapeGraph()
    { return m_shape_graphs.getDisplayedMap(); }
-   size_t m_displayed_datamap = -1;
+   int m_displayed_datamap = -1;
    ShapeMap& getDisplayedDataMap()
    { return m_dataMaps[m_displayed_datamap]; }
    const ShapeMap& getDisplayedDataMap() const
    { return m_dataMaps[m_displayed_datamap]; }
-   size_t getDisplayedDataMapRef() const
+   int getDisplayedDataMapRef() const
    { return m_displayed_datamap; }
 
-   void removeDataMap(int i)
+   void removeDataMap(size_t i)
    { if (m_displayed_datamap >= i) m_displayed_datamap--; m_dataMaps.erase(m_dataMaps.begin() + i); }
 
    void setDisplayedDataMapRef(size_t map)
    {
       if (m_displayed_datamap != -1 && m_displayed_datamap != map)
          m_dataMaps[m_displayed_datamap].clearSel();
-      m_displayed_datamap = map;
+      m_displayed_datamap = static_cast<int>(map);
    }
 
    template <class T>
-   size_t getMapRef(std::vector<T>& maps, const std::string& name) const
+   int getMapRef(std::vector<T>& maps, const std::string& name) const
    {
       // note, only finds first map with this name
       for (size_t i = 0; i < maps.size(); i++) {
          if (maps[i].getName() == name)
-            return i;
+            return static_cast<int>(i);
       }
       return -1;
    }

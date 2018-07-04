@@ -183,7 +183,7 @@ ShapeMap::~ShapeMap()
 
 // this can be reinit as well
 
-void ShapeMap::init(int size, const QtRegion &r)
+void ShapeMap::init(size_t size, const QtRegion &r)
 {
    m_pixel_shapes.clear();
    m_display_shapes.clear();
@@ -681,7 +681,7 @@ bool ShapeMap::moveShape(int shaperef, const Line& line, bool undoing)
       int conn_col = m_attributes.getOrInsertLockedColumnIndex("Connectivity");
       int leng_col = -1;
       //
-      int connectivity = 0;
+      size_t connectivity = 0;
       if (isAxialMap()) {
          // line connections optimised for line-line intersection
          connectivity = getLineConnections( shaperef, newconnections, TOLERANCE_B*__max(m_region.height(),m_region.width()));
@@ -952,7 +952,7 @@ void ShapeMap::removeShape(int shaperef, bool undoing)
             if (m_connectors[i].m_connections[j] == rowid) {
                m_connectors[i].m_connections.remove_at(j);
                if (conn_col != -1) {
-                  m_attributes.decrValue(i,conn_col);
+                  m_attributes.decrValue(static_cast<int>(i),conn_col);
                }
             }
             else if (m_connectors[i].m_connections[j] > (int)rowid) {
@@ -1048,7 +1048,7 @@ void ShapeMap::undo()
          }
          //
          // calculate this line's connections
-         int connectivity = getLineConnections(event.m_shape_ref,m_connectors[rowid].m_connections,TOLERANCE_B*__max(m_region.height(),m_region.width()));
+         size_t connectivity = getLineConnections(event.m_shape_ref,m_connectors[rowid].m_connections,TOLERANCE_B*__max(m_region.height(),m_region.width()));
          // update:
          int conn_col = m_attributes.getOrInsertLockedColumnIndex("Connectivity");
          m_attributes.setValue(rowid, conn_col, (float) connectivity );
@@ -1112,7 +1112,7 @@ void ShapeMap::makePolyPixels(int polyref)
                 pixShapes.push_back(shapeRef);
                 it = pixShapes.end() - 1;
             }
-            it->m_polyrefs.push_back(k);
+            it->m_polyrefs.push_back(static_cast<short>(k));
             relations.insert(std::make_pair(pixels[i],ShapeRef::SHAPE_EDGE));
          }
       }
@@ -1216,7 +1216,7 @@ void ShapeMap::makePolyPixels(int polyref)
          break;
       case SalaShape::SHAPE_POLY:
          for (size_t k = 0; k < poly.m_points.size() - 1; k++) {
-            int nextk = (k + 1);
+            size_t nextk = (k + 1);
             Line li(poly.m_points[k],poly.m_points[nextk]);
             if (k == 0) {
                poly.m_region = li;
@@ -1233,7 +1233,7 @@ void ShapeMap::makePolyPixels(int polyref)
                    pixShapes.push_back(ShapeRef(polyref, ShapeRef::SHAPE_OPEN));
                    it = pixShapes.end() - 1;
                }
-               it->m_polyrefs.push_back(k);
+               it->m_polyrefs.push_back(static_cast<short>(k));
             }
          }
          break;
@@ -1625,7 +1625,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                         else if (polyb.isPolyLine()) {
                            if (testPointInPoly(polyb.m_points[shaperefb.m_polyrefs[0]],shaperef) != -1)  {
                               testedlist.add(shaperefb.m_shape_ref,paftl::ADD_HERE);
-                              shapeindexlist.add(indexb);
+                              shapeindexlist.add(static_cast<int>(indexb));
                            }
                            else {
                               for (int k = 0; k < shaperef.m_polyrefs.size(); k++) {
@@ -1635,7 +1635,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                                     if (intersect_region(line,lineb)) {
                                        if (intersect_line(line,lineb,tolerance)) {
                                           if (testedlist.add(shaperefb.m_shape_ref) != -1) {
-                                             shapeindexlist.add(indexb);
+                                             shapeindexlist.add(static_cast<int>(indexb));
                                              break;
                                           }
                                        }
@@ -1652,7 +1652,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                            if ((pixelate(polyb.m_points[shaperefb.m_polyrefs[0]]) == PixelRef(x,y) && testPointInPoly(polyb.m_points[shaperefb.m_polyrefs[0]],shaperef) != -1) ||
                                (pixelate(poly.m_points[shaperef.m_polyrefs[0]]) == PixelRef(x,y) && testPointInPoly(poly.m_points[shaperef.m_polyrefs[0]],shaperefb) != -1))  {
                               testedlist.add(shaperefb.m_shape_ref,paftl::ADD_HERE);
-                              shapeindexlist.add(indexb);
+                              shapeindexlist.add(static_cast<int>(indexb));
                            }
                            else {
                               // now check crossing
@@ -1664,7 +1664,7 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                                     if (intersect_region(line,lineb)) {
                                        if (intersect_line(line,lineb,tolerance)) {
                                           testedlist.add(shaperefb.m_shape_ref,paftl::ADD_HERE);
-                                          shapeindexlist.add(indexb);
+                                          shapeindexlist.add(static_cast<int>(indexb));
                                           breakit = true;
                                           break;
                                        }
@@ -1810,7 +1810,7 @@ int ShapeMap::testPointInPoly(const Point2f& p, const ShapeRef& shape) const
             pvecint testnodes;
             size_t j;
             for (j = 0; j < size_t(shape.m_polyrefs.size()); j++) { // <- note, polyrefs is a subvec and has maximum number according to sizeof(T)
-               testnodes.add(shape.m_polyrefs[j]);
+               testnodes.add(shape.m_polyrefs[static_cast<short>(j)]);
             }
             PixelRef pix2 = pixelate(p);
             const std::vector<ShapeRef> &pixelShapes = m_pixel_shapes[pix2.x + pix2.y*m_cols];
@@ -2093,7 +2093,7 @@ void ShapeMap::cutLine(Line& li) //, short dir)
 }
 
 // code to add intersections when shapes are added to the graph one by one:
-int ShapeMap::connectIntersected(int rowid, bool linegraph)
+size_t ShapeMap::connectIntersected(int rowid, bool linegraph)
 {
    auto shaperefIter = depthmapX::getMapAtIndex(m_shapes, rowid);
    int conn_col = m_attributes.getOrInsertColumnIndex("Connectivity");
@@ -2107,7 +2107,7 @@ int ShapeMap::connectIntersected(int rowid, bool linegraph)
    while (m_connectors.size() < m_shapes.size()) {
       m_connectors.push_back( Connector() );
    }
-   int connectivity = linegraph ? 
+   size_t connectivity = linegraph ?
       getLineConnections( shaperefIter->first, m_connectors[rowid].m_connections, TOLERANCE_B*__max(m_region.height(),m_region.width())) :
       getShapeConnections( shaperefIter->first, m_connectors[rowid].m_connections, TOLERANCE_B*__max(m_region.height(),m_region.width()));
    m_attributes.setValue(rowid, conn_col, (float) connectivity );
@@ -2129,7 +2129,7 @@ int ShapeMap::connectIntersected(int rowid, bool linegraph)
 // use the other version, getShapeConnections for arbitrary shape-shape connections
 // note, connections are listed by rowid in list, *not* reference number
 // (so they may vary: must be checked carefully when shapes are removed / added)
-int ShapeMap::getLineConnections(int lineref, pvecint& connections, double tolerance)
+size_t ShapeMap::getLineConnections(int lineref, pvecint& connections, double tolerance)
 {
    SalaShape& poly = m_shapes.find(lineref)->second;
    if (!poly.isLine()) {
@@ -2147,7 +2147,7 @@ int ShapeMap::getLineConnections(int lineref, pvecint& connections, double toler
 
    testedshapes.add(lineref);
 
-   int num_intersections = 0;
+   size_t num_intersections = 0;
 
    PixelRefVector list = pixelateLine( l );
 
@@ -2182,7 +2182,7 @@ int ShapeMap::getLineConnections(int lineref, pvecint& connections, double toler
 }
 
 // this is only problematic as there is lots of legacy code with shape-in-shape testing,
-int ShapeMap::getShapeConnections(int shaperef, pvecint& connections, double tolerance)
+size_t ShapeMap::getShapeConnections(int shaperef, pvecint& connections, double tolerance)
 {
    // In versions prior to 10, note that unlike getLineConnections, self-connection is excluded by all of the following functions
    // As of version 10, both getShapeConnections and getLineConnections exclude self-connection
@@ -2233,7 +2233,7 @@ void ShapeMap::makeShapeConnections()
          int rowid = m_attributes.insertRow(key);
          // all indices should match...
          m_connectors.push_back( Connector() );
-         int connectivity = getShapeConnections( key, m_connectors[i].m_connections, TOLERANCE_B*__max(m_region.height(),m_region.width()));
+         size_t connectivity = getShapeConnections( key, m_connectors[i].m_connections, TOLERANCE_B*__max(m_region.height(),m_region.width()));
          m_attributes.setValue(rowid, conn_col, (float) connectivity );
       }
 
@@ -2325,8 +2325,8 @@ bool ShapeMap::setCurSel(const std::vector<int>& selset, bool add)
       auto shapeIter = m_shapes.find(selset[i]);
       size_t index = std::distance(m_shapes.begin(), shapeIter);  // relies on aligned indices for attributes and shapes
       if (index != paftl::npos) {
-         if(m_selection_set.insert(index).second) {
-            m_attributes.selectRowByIndex(int(index));
+         if(m_selection_set.insert(static_cast<int>(index)).second) {
+            m_attributes.selectRowByIndex(static_cast<int>(index));
          }
          shapeIter->second.m_selected = true;
          m_selection = true;
@@ -2523,7 +2523,7 @@ bool ShapeMap::write( std::ofstream& stream, int version )
    stream.write((char *) &largest_shape_ref, sizeof(largest_shape_ref));
 
    // write shape data
-   int count = m_shapes.size();
+   int count = static_cast<int>(m_shapes.size());
    stream.write((char *) &count, sizeof(count));
    for (auto shape: m_shapes) {
       int key = shape.first;
@@ -2531,7 +2531,7 @@ bool ShapeMap::write( std::ofstream& stream, int version )
       shape.second.write(stream);
    }
    // write object data (currently unused)
-   count = m_objects.size();
+   count = static_cast<int>(m_objects.size());
    stream.write((char *) &count, sizeof(count));
    for (auto obj: m_objects) {
       int key = obj.first;
@@ -2543,7 +2543,7 @@ bool ShapeMap::write( std::ofstream& stream, int version )
    stream.write((char *)&m_displayed_attribute,sizeof(m_displayed_attribute));
 
    // write connections data
-   count = m_connectors.size();
+   count = static_cast<int>(m_connectors.size());
    stream.write((char *)&count,sizeof(count)); 
 
    for (int i = 0; i < count; i++) {
@@ -2857,11 +2857,11 @@ pqvector<SalaEdgeU> SalaShape::getClippingSet(QtRegion& clipframe) const
       if (last_inside != next_inside) {
          if (last_inside) {
             EdgeU eu = clipframe.getCutEdgeU(m_points[i-1],m_points[i]);
-            edgeset.push_back(SalaEdgeU(i,false,eu));
+            edgeset.push_back(SalaEdgeU(static_cast<int>(i),false,eu));
          }
          else {
             EdgeU eu = clipframe.getCutEdgeU(m_points[i],m_points[i-1]);
-            edgeset.push_back(SalaEdgeU(i-1,true,eu));
+            edgeset.push_back(SalaEdgeU(static_cast<int>(i)-1,true,eu));
          }
       }
       last_inside = next_inside;
@@ -3016,10 +3016,10 @@ bool ShapeMap::linkShapes(int id1, int dir1, int id2, int dir2, float weight)
 {
    int success = -1;
    if (dir1 == 1) {
-      success = m_connectors[id1].m_forward_segconns.add(SegmentRef(dir2,id2),weight);
+      success = static_cast<int>(m_connectors[id1].m_forward_segconns.add(SegmentRef(dir2,id2),weight));
    }
    else {
-      success = m_connectors[id1].m_back_segconns.add(SegmentRef(dir2,id2),weight);
+      success = static_cast<int>(m_connectors[id1].m_back_segconns.add(SegmentRef(dir2,id2),weight));
    }
 
    // checking success != -1 avoids duplicate entries adding to connectivity

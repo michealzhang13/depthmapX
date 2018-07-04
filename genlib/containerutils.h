@@ -34,14 +34,14 @@ void addIfNotExists(std::vector<T> &vec, T element) {
 }
 
 template<typename K, typename V>
-typename std::map<K, V>::const_iterator getMapAtIndex(const std::map<K, V> &m, int idx) {
+typename std::map<K, V>::const_iterator getMapAtIndex(const std::map<K, V> &m, size_t idx) {
     auto iter = m.begin();
     std::advance(iter, idx);
     return iter;
 }
 
 template<typename K, typename V>
-typename std::map<K, V>::iterator getMapAtIndex(std::map<K, V> &m, int idx) {
+typename std::map<K, V>::iterator getMapAtIndex(std::map<K, V> &m, size_t idx) {
     auto iter = m.begin();
     std::advance(iter, idx);
     return iter;

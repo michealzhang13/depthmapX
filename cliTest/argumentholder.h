@@ -29,8 +29,8 @@ public:
         return (char**) mArgv.data();
     }
 
-    size_t argc() const{
-        return mArgv.size();
+    int argc() const{
+        return static_cast<int>(mArgv.size());
     }
 
 private:

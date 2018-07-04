@@ -89,7 +89,7 @@ struct Connector
    //
    // Cursor extras
    enum { CONN_ALL, SEG_CONN_ALL, SEG_CONN_FW, SEG_CONN_BK };
-   int count(int mode = CONN_ALL) const;
+   size_t count(int mode = CONN_ALL) const;
    int cursor(int mode = CONN_ALL) const;
    int direction(int mode = SEG_CONN_ALL) const;
    float weight(int mode = SEG_CONN_ALL) const;

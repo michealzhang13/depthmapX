@@ -118,7 +118,7 @@ void AgentEngine::run(Communicator *comm, PointMap *pointmap)
       size_t j;
       for (j = 0; j < size(); j++) {
          int q = invcumpoisson(prandomr(),at(j).m_release_rate);
-         int length = at(j).size();
+         int length = static_cast<int>(at(j).size());
          int k;
          for (k = 0; k < q; k++) {
             at(j).push_back(Agent(&(at(j)),pointmap,output_mode));
@@ -957,7 +957,7 @@ Point2f Agent::onOcclusionLook(bool wholeisovist, int looktype)
       vbin = 32;
    }
    if (looktype == AgentProgram::SEL_OCC_ALL) {
-      int choices = 0;
+      size_t choices = 0;
       Node& node = m_pointmap->getPoint(m_node).getNode();
       for (int i = 0; i < vbin; i++) {
          if (node.m_occlusion_bins[(directionbin+i)%32].size()) {
@@ -1068,7 +1068,6 @@ Point2f Agent::onLoSLook(bool wholeisovist, int look_type)
    int bbin = -1;
    if (m_program->m_destination_directed) {
       Point2f vec2 = m_destination - m_loc;
-      double test = vec2.length();
       vec2.normalise();
       bbin = binfromvec(vec2);
    }

@@ -18,7 +18,7 @@
 #include <QColorDialog>
 
 InterfacePage::InterfacePage(Settings &settings, QWidget *parent)
-    : SettingsPage(settings, parent)
+    : SettingsPage(parent)
 {
     readSettings(settings);
 

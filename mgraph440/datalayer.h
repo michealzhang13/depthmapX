@@ -173,7 +173,7 @@ public:
       if (iter != m_column_titles.end()) {
          size_t index = iter - m_column_titles.begin();
          for (size_t i = 0; i < m_data_objects.size(); i++) {
-            m_data_objects[i][index] = 0.0;
+            m_data_objects[(int)i][(int)index] = 0.0;
          }
          return (int) index;
       }

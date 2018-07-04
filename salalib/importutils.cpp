@@ -98,14 +98,14 @@ namespace depthmapX {
                         *communicator >> dp;
                     }
                     catch (Communicator::CancelledException) {
-                        return 0;
+                        return false;
                     }
                     catch (pexception) {
-                        return -1;
+                        return false;
                     }
 
                     if (communicator->IsCancelled()) {
-                        return 0;
+                        return false;
                     }
                 }
                 else {
@@ -152,19 +152,19 @@ namespace depthmapX {
         int xcol = -1, ycol = -1, x1col = -1, y1col = -1, x2col = -1, y2col = -1, refcol = -1;
         for(auto const& column: table) {
             if (column.first == "x" || column.first == "easting")
-                xcol = columns.size();
+                xcol = static_cast<int>(columns.size());
             else if (column.first == "y" || column.first == "northing")
-                ycol = columns.size();
+                ycol = static_cast<int>(columns.size());
             else if (column.first == "x1")
-                x1col = columns.size();
+                x1col = static_cast<int>(columns.size());
             else if (column.first == "x2")
-                x2col = columns.size();
+                x2col = static_cast<int>(columns.size());
             else if (column.first == "y1")
-                y1col = columns.size();
+                y1col = static_cast<int>(columns.size());
             else if (column.first == "y2")
-                y2col = columns.size();
+                y2col = static_cast<int>(columns.size());
             else if (column.first == "Ref")
-                refcol = columns.size();
+                refcol = static_cast<int>(columns.size());
             columns.push_back(column.first);
         }
 

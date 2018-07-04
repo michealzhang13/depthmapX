@@ -38,11 +38,11 @@ class NtfLayer : public prefvec<NtfGeometry> {
    friend class NtfMap;
 protected:
    std::string m_name;
-   int m_line_count;
+   size_t m_line_count;
 public:
    NtfLayer(const std::string& name = std::string())
       { m_name = name; m_line_count = 0; };
-   int getLineCount()
+   size_t getLineCount()
       { return m_line_count; }
    std::string getName()
       { return m_name; }
@@ -55,7 +55,7 @@ public:
 protected:
    NtfPoint m_offset;      // note: in metres
    QtRegion m_region;        // made in metres, although points are in cm
-   int m_line_count;
+   size_t m_line_count;
 public:
    NtfMap() {;}
    Line makeLine(const NtfPoint& a, const NtfPoint& b);
@@ -63,7 +63,7 @@ public:
    void open(const std::vector<std::string> &fileset, Communicator *comm);
    const QtRegion& getRegion() const
    { return m_region; }
-   int getLineCount() const
+   size_t getLineCount() const
    { return m_line_count; }
 protected:
    void fitBounds(const Line& li);

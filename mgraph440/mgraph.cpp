@@ -428,10 +428,10 @@ int MetaGraph::convertDataLayersToShapeMap(DataLayers& datalayers, PointMap& poi
    int retvar = 1;
    // check for existence of data:
    pmap<int,int> conversion_lookup;
-   size_t i;
-   for (i = 0; i < size_t(datalayers.getLayerCount()); i++) {
+
+   for (int i = 0; i < datalayers.getLayerCount(); i++) {
       if (datalayers[i].getObjectCount()) {
-         int x = m_data_maps.addMap(datalayers[i].getLayerName(),ShapeMap::DATAMAP);
+         int x = static_cast<int>(m_data_maps.addMap(datalayers[i].getLayerName(),ShapeMap::DATAMAP));
          conversion_lookup.add(i,x);
       }
    }
@@ -440,7 +440,7 @@ int MetaGraph::convertDataLayersToShapeMap(DataLayers& datalayers, PointMap& poi
       return 0;
    }
 
-   for (i = 0; i < conversion_lookup.size(); i++) {
+   for (int i = 0; i < conversion_lookup.size(); i++) {
       ShapeMap& shapemap = m_data_maps.getMap(conversion_lookup.value(i));
       int layer_ref = datalayers.getLayerRef(conversion_lookup.key(i));
       pvecint *shape_pixel_lists = new pvecint [datalayers[i].getObjectCount()];

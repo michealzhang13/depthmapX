@@ -47,7 +47,7 @@ CommandLineParser::CommandLineParser(const IModeParserFactory &parserFactory)
     :  _simpleMode(false), _modeParser(0), _parserFactory(parserFactory)
 {}
 
-void CommandLineParser::parse(size_t argc, char *argv[])
+void CommandLineParser::parse(int argc, char *argv[])
 {
     _valid = false;
     _printVersionMode = false;

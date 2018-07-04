@@ -36,8 +36,7 @@ namespace EntityParsing {
             throw EntityParseException("Badly formatted header (should contain x1, y1, x2 and y2)");
         }
 
-        size_t i;
-        for (i = 0; i < strings.size(); i++)
+        for (size_t i = 0; i < strings.size(); i++)
         {
            if (!strings[i].empty())
            {
@@ -48,22 +47,22 @@ namespace EntityParsing {
         }
 
         int x1col = -1, y1col = -1, x2col = -1, y2col = -1;
-        for (i = 0; i < strings.size(); i++) {
+        for (size_t i = 0; i < strings.size(); i++) {
             if (strings[i] == "x1")
             {
-                x1col = i;
+                x1col = static_cast<int>(i);
             }
             else if (strings[i] == "x2")
             {
-                x2col = i;
+                x2col = static_cast<int>(i);
             }
             else if (strings[i] == "y1")
             {
-                y1col = i;
+                y1col = static_cast<int>(i);
             }
             else if (strings[i] == "y2")
             {
-                y2col = i;
+                y2col = static_cast<int>(i);
             }
         }
 
@@ -88,7 +87,7 @@ namespace EntityParsing {
                     message << "Error parsing line: " << inputline << std::flush;
                     throw EntityParseException(message.str().c_str());
                 }
-                for (i = 0; i < strings.size(); i++)
+                for (size_t i = 0; i < strings.size(); i++)
                 {
                     if (i == x1col)
                     {
@@ -142,11 +141,11 @@ namespace EntityParsing {
         for (i = 0; i < strings.size(); i++) {
             if (strings[i] == "x")
             {
-                xcol = i;
+                xcol = static_cast<int>(i);
             }
             else if (strings[i] == "y")
             {
-                ycol = i;
+                ycol = static_cast<int>(i);
             }
         }
 
@@ -228,19 +227,19 @@ namespace EntityParsing {
         for (i = 0; i < strings.size(); i++) {
             if (strings[i] == "x")
             {
-                xcol = i;
+                xcol = static_cast<int>(i);
             }
             else if (strings[i] == "y")
             {
-                ycol = i;
+                ycol = static_cast<int>(i);
             }
             else if (strings[i] == "angle")
             {
-                anglecol = i;
+                anglecol = static_cast<int>(i);
             }
             else if (strings[i] == "viewangle")
             {
-                viewcol = i;
+                viewcol = static_cast<int>(i);
             }
         }
 

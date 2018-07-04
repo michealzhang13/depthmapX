@@ -84,7 +84,7 @@ TEST_CASE("MapInfo failing column attribute columns", "")
 
 TEST_CASE("Complete proper MapInfo file", "")
 {
-    const float EPSILON = 0.001;
+    const float EPSILON = 0.001f;
 
     // A typical MIF
 
