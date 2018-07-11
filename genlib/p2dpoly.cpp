@@ -575,7 +575,6 @@ bool Line::intersect_line(const Line& l, int axis, double& loc) const
          return false;
       }
    }
-   return false;
 }
 
 // this converts the loc back into a point:

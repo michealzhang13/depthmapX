@@ -135,14 +135,8 @@ struct RadialSegment : public pvecint
 {
    RadialKey radial_b;
 
-   // Quick mod - TV
-#if defined(_WIN32)
-   RadialSegment(RadialKey& rb = RadialKey()) : pvecint()
+   RadialSegment(RadialKey& rb) : pvecint()
    { radial_b = rb; }
-#else
-   RadialSegment(RadialKey& rb /*= RadialKey()*/) : pvecint()
-   { radial_b = rb; }
-#endif
 
    // Quick mod - TV
    RadialSegment() : pvecint()

@@ -202,8 +202,7 @@ bool ShapeMap::read( std::ifstream& stream, int version, bool drawinglayer )
 
    // prepare pixel map:
    m_pixel_shapes = new pqvector<ShapeRef> *[m_cols];
-   int i;
-   for (i = 0; i < m_cols; i++) {
+   for (int i = 0; i < m_cols; i++) {
       m_pixel_shapes[i] = new pqvector<ShapeRef>[m_rows];
    }
    // Now add the pixel shapes pixel map:
@@ -214,7 +213,6 @@ bool ShapeMap::read( std::ifstream& stream, int version, bool drawinglayer )
 
    // later versions can have shape connections:
    if (version >= VERSION_AXIAL_SHAPES) {
-      int count;
       stream.read((char *)&count,sizeof(count));
       for (int i = 0; i < count; i++) {
          m_connectors.push_back(Connector());
@@ -510,6 +508,8 @@ int ShapeMap::moveDir(int side)
    case ShapeRef::SHAPE_T:
       dir = PixelRef::VERTICAL;
       break;
+   default:
+       throw depthmapX440::RuntimeException("Invalid direction");
    }
    return dir;
 }
@@ -970,7 +970,7 @@ void ShapeMap::lineInPolyList(const Line& li_orig, pvecint& shapeindexlist, int 
             const ShapeRef& shape = shapes[j];
             // slow to do this as it can repeat -- really need to use a linetest like structure to avoid retest of
             // polygon lines
-            if (shape.m_shape_ref != lineref && shape.m_tags & (ShapeRef::SHAPE_EDGE | ShapeRef::SHAPE_INTERNAL_EDGE | ShapeRef::SHAPE_OPEN)) {
+            if (shape.m_shape_ref != static_cast<unsigned int>(lineref) && shape.m_tags & (ShapeRef::SHAPE_EDGE | ShapeRef::SHAPE_INTERNAL_EDGE | ShapeRef::SHAPE_OPEN)) {
                const SalaShape& poly = m_shapes.search(shape.m_shape_ref);
                switch (poly.m_type & (SalaShape::SHAPE_LINE | SalaShape::SHAPE_POLY)) {
                case SalaShape::SHAPE_LINE:
@@ -1150,10 +1150,10 @@ int ShapeMap::testPointInPoly(const Point2f& p, const ShapeRef& shape) const
       const SalaShape& poly = m_shapes.search(shape.m_shape_ref);
       if (poly.m_region.contains_touch(p)) {
          // next simplest, on the outside border:
-         int alpha = 0;
-         int counter = 0;
-         int parity = 0;
          if (shape.m_tags & ShapeRef::SHAPE_EDGE) {
+             int alpha = 0;
+             int counter = 0;
+             int parity = 0;
             // run a test line to the edge:
             if (shape.m_tags & (ShapeRef::SHAPE_L | ShapeRef::SHAPE_R)) {
                if (shape.m_tags & ShapeRef::SHAPE_L) {

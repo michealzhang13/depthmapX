@@ -162,7 +162,7 @@ bool AttributeTable::selectRowByKey(int key) const
       }
       else {
          // already selected or not visible
-         index = -1;
+         index = static_cast<size_t>(-1);
       }
    }
    return index != -1;
@@ -424,23 +424,26 @@ bool AttributeTable::importTable(std::istream& stream, bool merge)
 {
    std::string inputline;
    stream >> inputline;
-   
-   // check for a tab delimited header line...
-   auto strings = dXstring::split(inputline, '\t');
-   if (strings.size() < 1) {
-      return false;
-   }
-   // the first column *must* be "Ref"
-   if (strings[0] != "Ref" && strings[0] != "ref") {  //EF replace || with &&
-      return false;
-   }
-
    pvecint colrefs;
 
-   for (size_t i = 1; i < strings.size(); i++) {
-      int col = getOrInsertColumnIndex(strings[i]);
-      colrefs.push_back( col );
-   }
+   {
+       // check for a tab delimited header line...
+       auto strings = dXstring::split(inputline, '\t');
+       if (strings.size() < 1) {
+          return false;
+       }
+       // the first column *must* be "Ref"
+       if (strings[0] != "Ref" && strings[0] != "ref") {  //EF replace || with &&
+          return false;
+       }
+
+
+
+       for (size_t i = 1; i < strings.size(); i++) {
+          int col = getOrInsertColumnIndex(strings[i]);
+          colrefs.push_back( col );
+       }
+    }
 
    // check no columns to import (note, this is not necessarily an error, there may 
    // simply be no columns to import) -- handle false return appropriately

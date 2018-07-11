@@ -320,7 +320,7 @@ size_t ShapeMaps<T>::getMapRef(const std::string& name) const
       if (prefvec<T>::at(i).getName() == name)
          return i;
    }
-   return -1;
+   return static_cast<size_t>(-1);
 }
 
 }

@@ -23,12 +23,14 @@
 #include <map>
 #include <fstream>
 #include <sstream>
+#include <locale>
 
 inline std::string tolower(const std::string& str)
 {
+   std::locale loc;
    std::string s = str;
    for (size_t i = 0; i < s.length(); i++) {
-      s[i] = tolower(s[i]);
+      s[i] = std::tolower(s[i], loc);
    }
    return s;
 }

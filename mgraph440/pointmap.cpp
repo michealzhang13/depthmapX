@@ -1,5 +1,6 @@
 #include "mgraph440/pointmap.h"
 #include "mgraph440/containerutils.h"
+#include "exceptions.h"
 
 namespace mgraph440 {
 
@@ -51,7 +52,7 @@ bool PointMap::read(std::ifstream& stream, int version )
    // for old data versions:
    int attr_count = -1, which_attributes = -1;
 
-   int displayed_attribute;  // n.b., temp variable necessary to force recalc below
+   int displayed_attribute = 0;  // n.b., temp variable necessary to force recalc below
    if (version >= VERSION_ATTRIBUTES_TABLE) {
       // our data read
       stream.read((char *)&displayed_attribute,sizeof(displayed_attribute));
@@ -286,8 +287,8 @@ void PointMap::convertAttributes(int which_attributes)
 
 void PointMap::addGridConnections()
 {
-   for (int i = 0; i < m_attributes.getRowCount(); i++) {
-      PixelRef curs = m_attributes.getRowKey(i);
+   for (int r = 0; r < m_attributes.getRowCount(); r++) {
+      PixelRef curs = m_attributes.getRowKey(r);
       PixelRef node = curs.right();
       Point& point = getPoint(curs);
       point.m_grid_connections = 0;
@@ -313,6 +314,9 @@ void PointMap::addGridConnections()
          }
          else if (i == 20 || i == 24) {
             dir = PixelRef::HORIZONTAL;
+         }
+         else {
+             throw depthmapX440::RuntimeException("i is not a multiple of 4 - how did you even get here?");
          }
          node.move(dir);
       }

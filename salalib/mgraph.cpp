@@ -1681,8 +1681,7 @@ bool MetaGraph::pushValuesToLayer(int sourcetype, int sourcelayer, int desttype,
       double *vals = new double [table_out.getRowCount()];
       int *counts = new int [table_out.getRowCount()];
 
-      int i;
-      for (i = 0; i < table_out.getRowCount(); i++) {
+      for (int i = 0; i < table_out.getRowCount(); i++) {
          counts[i] = 0; // count set to zero for all
          vals[i] = -1;
       }
@@ -1740,7 +1739,7 @@ bool MetaGraph::pushValuesToLayer(int sourcetype, int sourcelayer, int desttype,
          }
       }
 
-      for (i = 0; i < table_out.getRowCount(); i++) {
+      for (size_t i = 0; i < table_out.getRowCount(); i++) {
          if (!table_out.isVisible(i)) {
             continue;
          }
@@ -1967,6 +1966,8 @@ int MetaGraph::addAttribute(const std::string& name)
    case VIEWDATA:
       col = getDisplayedDataMap().addAttribute(name);
       break;
+   default:
+       throw depthmapX::RuntimeException("Invalid view class");
    }
    return col;
 }

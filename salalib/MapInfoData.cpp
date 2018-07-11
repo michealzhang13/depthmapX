@@ -44,8 +44,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
    // 
    std::vector<std::string> colnames;
    pvecint readable, colindexes;
-   size_t i;
-   for (i = 0; i < columnheads.size(); i++) {
+   for (size_t i = 0; i < columnheads.size(); i++) {
       dXstring::ltrim(columnheads[i]);
       auto tokens = dXstring::split(columnheads[i], ' ',true);
       if (dXstring::beginsWith<std::string>(tokens[1],"Integer")
@@ -59,7 +58,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
       }
    }
 
-   for (i = 0; i < colnames.size(); i++) {
+   for (size_t i = 0; i < colnames.size(); i++) {
       colindexes.push_back(table.getColumnIndex(colnames[i]));
    }
 
@@ -93,8 +92,8 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
       else if (dXstring::beginsWith<std::string>(textline,"pline") || dXstring::beginsWith<std::string>(textline,"region")) {
          int type = dXstring::beginsWith<std::string>(textline,"pline") ? SalaShape::SHAPE_POLY : (SalaShape::SHAPE_POLY | SalaShape::SHAPE_CLOSED);
          // note: polylines, even multiple lines, are condensed into a single line
-         auto tokens = dXstring::split(textline,' ',true);
          int multiple = 1;
+         auto tokens = dXstring::split(textline,' ',true);
          if (tokens.size() > 1) {
             if (tokens[1] == "multiple") {
                multiple = stoi(tokens[2]);
@@ -106,7 +105,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
             if (multiple == 0) {
                multiple = 1;
             }
-         }
+        }
          for (int i = 0; i < multiple; i++) {
             int count = -1;
             if ((type & SalaShape::SHAPE_CLOSED) != SalaShape::SHAPE_CLOSED && tokens.size() == 2) {
@@ -123,8 +122,8 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
             for (int j = 0; j < count; j++) {
                dXstring::safeGetline(miffile, textline);
                dXstring::ltrim(textline);
-               auto tokens = dXstring::split(textline,' ',true);
-               pointsets.back().push_back(Point2f(stod(tokens[0]),stod(tokens[1])));
+               auto lineTokens = dXstring::split(textline,' ',true);
+               pointsets.back().push_back(Point2f(stod(lineTokens[0]),stod(lineTokens[1])));
             }
             if (i != 0) {
                // warn about extraneous pline data
@@ -144,7 +143,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
    int lastrow = -1;
 
    QtRegion region(pointsets[0][0],pointsets[0][0]);
-   for (i = 0; i < pointsets.size(); i++) {
+   for (size_t i = 0; i < pointsets.size(); i++) {
       for (size_t j = 0; j < pointsets[i].size(); j++) {
          region.encompass(pointsets[i][j]);
       }
@@ -164,8 +163,8 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
          // table data entries:
          if (nextduplicate < duplicates.size() && duplicates[nextduplicate] == i) {
             // duplicate last row:
-            for (size_t i = 0; i < colindexes.size(); i++) {
-               table.setValue(row,colindexes[i],table.getValue(lastrow,colindexes[i]));
+            for (size_t col = 0; col < colindexes.size(); col++) {
+               table.setValue(row,colindexes[col],table.getValue(lastrow,colindexes[col]));
             }
             nextduplicate++;
          }

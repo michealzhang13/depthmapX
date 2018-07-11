@@ -105,10 +105,10 @@ size_t dXreimpl::AttributeColumnImpl::read(std::istream &stream, int )
 void dXreimpl::AttributeColumnImpl::write(std::ostream &stream, int physicalCol)
 {
     dXstring::writeString(stream, m_name);
-    float min = (float)m_stats.min;
-    float max = (float)m_stats.max;
-    stream.write((char *)&min, sizeof(float));
-    stream.write((char *)&max, sizeof(float));
+    float minVal = (float)m_stats.min;
+    float maxVal = (float)m_stats.max;
+    stream.write((char *)&minVal, sizeof(float));
+    stream.write((char *)&maxVal, sizeof(float));
     stream.write((char *)&m_stats.total, sizeof(m_stats.total));
     stream.write((char *)&physicalCol, sizeof(int));
     stream.write((char *)&m_hidden, sizeof(bool));

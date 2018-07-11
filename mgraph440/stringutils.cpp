@@ -18,7 +18,7 @@
 #include <memory>
 #include <cstring>
 #include <algorithm>
-#include <ctype.h>
+#include <locale>
 
 namespace dXstring440 {
     std::vector<std::string> split(const std::string &s, char delim, bool skipEmptyTokens)
@@ -65,15 +65,17 @@ namespace dXstring440 {
 
     std::string formatString(double value, const std::string &format)
     {
-        std::vector<char> buffer(24 + format.length(), '\0');
-        sprintf( &buffer[0], format.c_str(), value );
+        size_t length = 24 + format.length();
+        std::vector<char> buffer(length, '\0');
+        sprintf_s( &buffer[0], length, format.c_str(), value );
         return std::string(&buffer[0]);
     }
 
     std::string formatString(int value, const std::string &format)
     {
-        std::vector<char> buffer(24 + format.length(), '\0');
-        sprintf( &buffer[0], format.c_str(), value );
+        size_t length = 24 + format.length();
+        std::vector<char> buffer(length, '\0');
+        sprintf_s( &buffer[0], length, format.c_str(), value );
         return std::string(&buffer[0]);
     }
 
@@ -102,6 +104,7 @@ namespace dXstring440 {
     {
         bool literal = false;
         bool reset = true;
+        std::locale loc;
         for( auto& c : s)
         {
             if (!isalpha(c))
@@ -118,11 +121,11 @@ namespace dXstring440 {
                 {
                     if (reset)
                     {
-                        c = toupper(c);
+                        c = std::toupper(c, loc);
                     }
                     else
                     {
-                        c = tolower(c);
+                        c = std::tolower(c, loc);
                     }
                 }
                 reset = false;

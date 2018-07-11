@@ -1099,8 +1099,8 @@ void AxialMinimiser::fewestLongest(std::map<int,pvecint>& axsegcuts, std::map<Ra
       int j = m_vps[i].index;
       // vital connections code (uses original unaltered connections)
       bool vitalconn = false;
-      size_t k;
-      for (k = 0; k < keyvertexconns[j].size(); k++) {
+
+      for (size_t k = 0; k < keyvertexconns[j].size(); k++) {
          // first check to see if removing this line will cause elimination of a vital connection
          if (keyvertexcounts[keyvertexconns[j][k]] <= 1) {
             // connect vital... just go on to the next one:
@@ -1114,7 +1114,7 @@ void AxialMinimiser::fewestLongest(std::map<int,pvecint>& axsegcuts, std::map<Ra
       //
       bool presumedvital = false;
       auto &axSegCut = depthmapX::getMapAtIndex(axsegcuts, j)->second;
-      for (k = 0; k < axSegCut.size(); k++) {
+      for (size_t k = 0; k < axSegCut.size(); k++) {
          if (m_radialsegcounts[axSegCut[k]] <= 1) {
             presumedvital = true;
             break;
@@ -1930,9 +1930,9 @@ void ShapeGraph::outputNet(std::ostream& netfile) const
    Point2f offset = Point2f((maxdim - m_region.width())/(2.0*maxdim),(maxdim - m_region.height())/(2.0*maxdim));
    if (isSegmentMap()) {
       netfile << "*Vertices " << m_shapes.size() * 2 << std::endl;
-      int i = -1;
+      int shapeCount = -1;
       for (auto shape: m_shapes) {
-         i++;
+         shapeCount++;
          Line li = shape.second.getLine();
          Point2f p1 = li.start();
          Point2f p2 = li.end();
@@ -1940,8 +1940,8 @@ void ShapeGraph::outputNet(std::ostream& netfile) const
          p2.x = offset.x + (p2.x - m_region.bottom_left.x) / maxdim;
          p1.y = 1.0 - (offset.y + (p1.y - m_region.bottom_left.y) / maxdim);
          p2.y = 1.0 - (offset.y + (p2.y - m_region.bottom_left.y) / maxdim);
-         netfile << (i * 2 + 1) << " \"" << i << "a\" " << p1.x << " " << p1.y << std::endl;
-         netfile << (i * 2 + 2) << " \"" << i << "b\" " << p2.x << " " << p2.y << std::endl;
+         netfile << (shapeCount * 2 + 1) << " \"" << shapeCount << "a\" " << p1.x << " " << p1.y << std::endl;
+         netfile << (shapeCount * 2 + 2) << " \"" << shapeCount << "b\" " << p2.x << " " << p2.y << std::endl;
       }
       netfile << "*Edges" << std::endl;
       for (size_t i = 0; i < m_shapes.size(); i++) {
@@ -2019,7 +2019,7 @@ void ShapeGraph::makeDivisions(const prefvec<PolyConnector>& polyconnections, co
                   break;
                case 2:
                   {
-                     int index = static_cast<int>(depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref));
+                     size_t index = depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref);
                      if (index != shape.m_shape_ref) {
                         throw 1; // for the code to work later this can't be true!
                      }
@@ -2029,7 +2029,7 @@ void ShapeGraph::makeDivisions(const prefvec<PolyConnector>& polyconnections, co
                   break;
                case 1:
                   {
-                     int index = static_cast<int>(depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref));
+                     size_t index = depthmapX::findIndexFromKey(axialdividers, (int) shape.m_shape_ref);
                      if (index != shape.m_shape_ref) {
                         throw 1; // for the code to work later this can't be true!
                      }
