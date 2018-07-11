@@ -3,7 +3,7 @@ include(../defaults.pri)
 
 QT       -= qt
 QT -= gui
-CONFIG   -= qt
+CONFIG   -= qt warn_on
 
 
 CONFIG += staticlib c++11 console
