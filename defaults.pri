@@ -14,4 +14,3 @@ Debug:UI_DIR = debug/.ui
 
 win32: QMAKE_CXXFLAGS_WARN_ON -= -W3
 win32: QMAKE_CXXFLAGS_WARN_ON += -W4
-!win32: QMAKE_CXXFLAGS += -Wall
