@@ -68,7 +68,7 @@ namespace dXstring440 {
     {
         size_t length = 24 + format.length();
         std::vector<char> buffer(length, '\0');
-        sprintf_s( &buffer[0], length, format.c_str(), value );
+        snprintf( &buffer[0], length, format.c_str(), value );
         return std::string(&buffer[0]);
     }
 
@@ -76,7 +76,7 @@ namespace dXstring440 {
     {
         size_t length = 24 + format.length();
         std::vector<char> buffer(length, '\0');
-        sprintf_s( &buffer[0], length, format.c_str(), value );
+        snprintf( &buffer[0], length, format.c_str(), value );
         return std::string(&buffer[0]);
     }
 
