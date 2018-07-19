@@ -79,18 +79,18 @@ TEST_CASE("Test getVisibleLines", "")
 TEST_CASE("Test pointMaps", "")
 {
     std::unique_ptr<MetaGraph> mgraph(new MetaGraph());
-    int pointMapIdx = mgraph->addNewPointMap("Kenny");
+    int pointMapIdxKenny = mgraph->addNewPointMap("Kenny");
     REQUIRE(mgraph->getPointMaps().size() == 1);
-    REQUIRE(pointMapIdx == 0);
+    REQUIRE(pointMapIdxKenny == 0);
     REQUIRE(mgraph->getPointMaps()[0].getName() == "Kenny");
-    REQUIRE(mgraph->getDisplayedPointMapRef() == pointMapIdx);
+    REQUIRE(mgraph->getDisplayedPointMapRef() == pointMapIdxKenny);
     REQUIRE(mgraph->getDisplayedPointMap().getName() == "Kenny");
 
     SECTION( "Add another and remove the first through the MetaGraph" )
     {
-        int pointMapIdx = mgraph->addNewPointMap("Stan");
+        int pointMapIdxStan = mgraph->addNewPointMap("Stan");
         REQUIRE(mgraph->getPointMaps().size() == 2);
-        REQUIRE(pointMapIdx == 1);
+        REQUIRE(pointMapIdxStan == 1);
         REQUIRE(mgraph->getPointMaps()[1].getName() == "Stan");
         REQUIRE(mgraph->getDisplayedPointMapRef() == 1);
         REQUIRE(mgraph->getDisplayedPointMap().getName() == "Stan");

@@ -102,7 +102,7 @@ AxialVertex AxialPolygons::makeVertex(const AxialVertexKey& vertexkey, const Poi
    // TODO: (CS) Double as key is problematic - books have been written about double equality...
    std::map<double,int> anglemap;
    for (size_t i = 0; i < pointlist.size(); i++) {
-      anglemap.insert(std::make_pair( angle(openspace,av.m_point,pointlist[i]), i ));
+      anglemap.insert(std::make_pair<double,int>( angle(openspace,av.m_point,pointlist[i]), static_cast<int>(i) ));
    }
 
    av.m_ref_a = anglemap.begin()->second;
@@ -2036,7 +2036,7 @@ void ShapeGraph::makeDivisions(const prefvec<PolyConnector>& polyconnections, co
                      //
                      // this makes sure actually crosses between the line and the openspace properly
                      if (radiallines[connindex].cuts(line)) {
-                        axialdividers[index].add(connindex);
+                        axialdividers[static_cast<int>(index)].add(connindex);
                         connIter->second.add(shape.m_shape_ref);
                      }
                   }
@@ -2099,8 +2099,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    }
 
    // first enter the required attribute columns:
-   size_t r;
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text;
       if (radius[r] != -1) {
          radius_text = std::string(" R") + dXstring::formatString(int(radius[r]),"%d");
@@ -2180,7 +2179,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    // then look up all the columns... eek:
    pvecint choice_col, n_choice_col, w_choice_col, nw_choice_col, entropy_col, integ_dv_col, integ_pv_col, integ_tk_col, intensity_col,
            depth_col, count_col, rel_entropy_col, penn_norm_col, w_depth_col, total_weight_col, ra_col, rra_col, td_col, harmonic_col;
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text;
       if (radius[r] != -1) {
          radius_text = std::string(" R") + dXstring::formatString(int(radius[r]),"%d");
@@ -2247,7 +2246,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
          td_col.push_back(m_attributes.getColumnIndex(td_col_text.c_str()));
       }
    }
-   int control_col, controllability_col;
+   int control_col = 0, controllability_col = 0;
    if (local) {
        if(!simple_version) {
            control_col = m_attributes.getColumnIndex("Control");
@@ -2256,11 +2255,11 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    }
 
    // for choice
-   AnalysisInfo **audittrail;
+   std::vector<std::vector<AnalysisInfo>> audittrail;
    if (choice) {
-      audittrail = new AnalysisInfo *[m_connectors.size()];
+      audittrail.reserve(m_connectors.size());
       for (size_t i = 0; i < m_connectors.size(); i++) {
-         audittrail[i] = new AnalysisInfo [radius.size()];
+         audittrail.push_back(std::vector<AnalysisInfo>(radius.size()));
       }
    }
 
@@ -2514,10 +2513,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
             w_total_choice += audittrail[i][r].weighted_choice;
             // n.b., normalise choice according to (n-1)(n-2)/2 (maximum possible through routes)
             double node_count = m_attributes.getValue(i,count_col[r]);
-            double total_weight;
-            if (weighting_col != -1) {
-                total_weight = m_attributes.getValue(i,total_weight_col[r]);
-            }
+            double total_weight = weighting_col != -1 ? m_attributes.getValue(i,total_weight_col[r]) : 1.0;
             if (node_count > 2) {
                m_attributes.setValue(i,choice_col[r],float(total_choice));
                m_attributes.setValue(i,n_choice_col[r],float(2.0*total_choice/((node_count-1)*(node_count-2))));
@@ -2536,10 +2532,6 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
             }
          }
       }
-      for (size_t i = 0; i < m_connectors.size(); i++) {
-         delete [] audittrail[i];
-      }
-      delete [] audittrail;
    }
 
    m_displayed_attribute = -1; // <- override if it's already showing
@@ -3172,8 +3164,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
 
    pvecint depth_col, count_col, total_col;
    // first enter table values
-   size_t r;
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text = makeRadiusText(Options::RADIUS_ANGULAR,radius[r]);
       std::string depth_col_text = std::string("Angular Mean Depth") + radius_text;
       m_attributes.insertColumn(depth_col_text.c_str());
@@ -3183,7 +3174,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
       m_attributes.insertColumn(total_col_text.c_str());
    }
 
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text = makeRadiusText(Options::RADIUS_ANGULAR,radius[r]);
       std::string depth_col_text = std::string("Angular Mean Depth") + radius_text;
       depth_col.push_back(m_attributes.getColumnIndex(depth_col_text.c_str()));
@@ -3203,8 +3194,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
       anglebins.add(0.0f,SegmentData(0,static_cast<int>(i),SegmentRef(),0,0.0,0));
       pvecdouble total_depth;
       pvecint node_count;
-      size_t r;
-      for (r = 0; r < radius.size(); r++) {
+      for (size_t r = 0; r < radius.size(); r++) {
          total_depth.push_back(0.0);
          node_count.push_back(0);
       }
@@ -3254,7 +3244,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
       // set the attributes for this node:
       int curs_node_count = 0;
       double curs_total_depth = 0.0;
-      for (r = 0; r < radius.size(); r++) {
+      for (size_t r = 0; r < radius.size(); r++) {
          curs_node_count += node_count[r];
          curs_total_depth += total_depth[r];
          m_attributes.setValue(i,count_col[r],float(curs_node_count));
@@ -3373,8 +3363,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    std::string tulip_text = std::string("T") + dXstring::formatString(tulip_bins,"%d");
 
    // first enter the required attribute columns:
-   size_t r;
-   for (r = 0; r < radius_unconverted.size(); r++) {
+   for (size_t r = 0; r < radius_unconverted.size(); r++) {
       std::string radius_text = makeRadiusText(radius_type, radius_unconverted[r]);
       if (choice) {
             //EF routeweight *
@@ -3454,7 +3443,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    }
    pvecint choice_col, w_choice_col, w_choice_col2, count_col, integ_col, w_integ_col, td_col, w_td_col, total_weight_col;
    // then look them up! eek....
-   for (r = 0; r < radius_unconverted.size(); r++) {
+   for (size_t r = 0; r < radius_unconverted.size(); r++) {
       std::string radius_text = makeRadiusText(radius_type, radius_unconverted[r]);
       if (choice) {
             //EF routeweight *
@@ -3549,7 +3538,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
 
    }
    pvecdouble radius;
-   for (r = 0; r < radius_unconverted.size(); r++) {
+   for (size_t r = 0; r < radius_unconverted.size(); r++) {
       if (radius_type == Options::RADIUS_ANGULAR && radius_unconverted[r] != -1) {
          radius.push_back(floor(radius_unconverted[r] * tulip_bins * 0.5));
       }

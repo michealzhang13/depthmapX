@@ -849,8 +849,8 @@ bool ShapeMap::polyAppend(int shape_ref, const Point2f& point)
    }
    else {
       // pixelate all polys in the pixel new structure:
-      for (auto shape: m_shapes) {
-         makePolyPixels(shape.first);
+      for (auto poly: m_shapes) {
+         makePolyPixels(poly.first);
       }
    }
 
@@ -1366,7 +1366,7 @@ void ShapeMap::removePolyPixels(int polyref)
 
 int ShapeMap::moveDir(int side)
 {
-   int dir;
+   int dir = PixelRef::NODIR;
    switch (side)
    {
    case ShapeRef::SHAPE_L:
@@ -1520,7 +1520,7 @@ void ShapeMap::lineInPolyList(const Line& li_orig, pvecint& shapeindexlist, int 
          for (const ShapeRef& shape: shapes) {
             // slow to do this as it can repeat -- really need to use a linetest like structure to avoid retest of 
             // polygon lines
-            if (shape.m_shape_ref != lineref && shape.m_tags & (ShapeRef::SHAPE_EDGE | ShapeRef::SHAPE_INTERNAL_EDGE | ShapeRef::SHAPE_OPEN)) {
+            if (shape.m_shape_ref != static_cast<unsigned int>(lineref) && shape.m_tags & (ShapeRef::SHAPE_EDGE | ShapeRef::SHAPE_INTERNAL_EDGE | ShapeRef::SHAPE_OPEN)) {
                auto shapeIter = m_shapes.find(shape.m_shape_ref);
                const SalaShape& poly = shapeIter->second;
                switch (poly.m_type & (SalaShape::SHAPE_LINE | SalaShape::SHAPE_POLY)) {
@@ -1596,9 +1596,9 @@ void ShapeMap::polyInPolyList(int polyref, pvecint& shapeindexlist, double toler
                   // this has us in it, now looked through everything else:
                    for (auto& shaperefb: shaperefs) {
                      if (shaperef != shaperefb && testedlist.searchindex(shaperefb.m_shape_ref) == paftl::npos) {
-                        auto shapeIter = m_shapes.find(shaperefb.m_shape_ref);
-                        size_t indexb = std::distance(m_shapes.begin(), shapeIter);
-                        const SalaShape& polyb = shapeIter->second;
+                        auto targetShape = m_shapes.find(shaperefb.m_shape_ref);
+                        size_t indexb = std::distance(m_shapes.begin(), targetShape);
+                        const SalaShape& polyb = targetShape->second;
                         if (polyb.isPoint()) {
                            if (testPointInPoly(polyb.getPoint(),shaperef) != -1) {
                               shapeindexlist.add((int)indexb);
@@ -1732,10 +1732,10 @@ int ShapeMap::testPointInPoly(const Point2f& p, const ShapeRef& shape) const
       const SalaShape& poly = shapeIter->second;
       if (poly.m_region.contains_touch(p)) {
          // next simplest, on the outside border:
-         int alpha = 0;
-         int counter = 0;
-         int parity = 0;
          if (shape.m_tags & ShapeRef::SHAPE_EDGE) {
+             int alpha = 0;
+             int counter = 0;
+             int parity = 0;
             // run a test line to the edge:
             if (shape.m_tags & (ShapeRef::SHAPE_L | ShapeRef::SHAPE_R)) {
                if (shape.m_tags & ShapeRef::SHAPE_L) {

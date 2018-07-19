@@ -429,7 +429,6 @@ inline bool SalaObj::toBool() const
       default: 
          throw SalaError(std::string("Cannot convert ") + getTypeIndefArt() + getTypeStr() + std::string(" to a boolean value"));
    }
-   return false;
 }
 inline int SalaObj::toInt() const
 {
@@ -439,7 +438,6 @@ inline int SalaObj::toInt() const
       case S_DOUBLE: return int(floor(data.f)); // ensure properly implemented
       default: throw SalaError(std::string("Cannot convert ") + getTypeIndefArt() + getTypeStr() + std::string(" to an integer value"));
    }
-   return 0;
 }
 inline double SalaObj::toDouble() const
 {
@@ -449,7 +447,6 @@ inline double SalaObj::toDouble() const
       case S_DOUBLE: return data.f;
       default: throw SalaError(std::string("Cannot convert ") + getTypeIndefArt() + getTypeStr() + std::string(" to a floating point number"));
    }
-   return 0.0;
 }
 inline std::string SalaObj::toString() const
 {
@@ -480,7 +477,6 @@ inline SalaObj operator + (SalaObj& a, SalaObj& b)
       case SalaObj::S_STRING: return SalaObj(*(a.data.str.string) + *(b.data.str.string));
       default: throw SalaError(std::string("Cannot add ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" to ")  + b.getTypeIndefArt() + b.getTypeStr());
    }
-   return SalaObj();
 }
 inline SalaObj operator - (SalaObj& a, SalaObj& b)
 {
@@ -492,7 +488,6 @@ inline SalaObj operator - (SalaObj& a, SalaObj& b)
          return (a.type == SalaObj::S_INT) ? (double(a.data.i) - b.data.f) : (a.data.f - double(b.data.i));
       default: throw SalaError(std::string("Cannot subtract ") + b.getTypeIndefArt() + b.getTypeStr() + std::string(" from ") + a.getTypeIndefArt() + a.getTypeStr());
    }
-   return SalaObj();
 }
 inline SalaObj operator - (SalaObj& a)
 {
@@ -502,7 +497,6 @@ inline SalaObj operator - (SalaObj& a)
       case SalaObj::S_DOUBLE: return SalaObj(-a.data.f);
       default: throw SalaError(std::string("Cannot minus ") + a.getTypeIndefArt() + a.getTypeStr());
    }
-   return SalaObj();
 }
 inline SalaObj operator * (SalaObj& a, SalaObj& b)
 {
@@ -513,7 +507,6 @@ inline SalaObj operator * (SalaObj& a, SalaObj& b)
          return (a.type == SalaObj::S_INT) ? (double(a.data.i) * b.data.f) : (a.data.f * double(b.data.i));
       default: throw SalaError(std::string("Cannot multiply ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" by ") + b.getTypeIndefArt() + b.getTypeStr());
    }
-   return SalaObj();
 }
 inline SalaObj operator % (SalaObj& a, SalaObj& b)
 {
@@ -524,7 +517,6 @@ inline SalaObj operator % (SalaObj& a, SalaObj& b)
          return (a.type == SalaObj::S_INT) ? fmod(double(a.data.i),b.data.f) : fmod(a.data.f,double(b.data.i));
       default: throw SalaError(std::string("Cannot multiply ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" by ") + b.getTypeIndefArt() + b.getTypeStr());
    }
-   return SalaObj();
 }
 inline SalaObj operator / (SalaObj& a, SalaObj& b)
 {
@@ -535,7 +527,6 @@ inline SalaObj operator / (SalaObj& a, SalaObj& b)
          return (a.type == SalaObj::S_INT) ? (double(a.data.i) / b.data.f) : (a.data.f / double(b.data.i));
       default: throw SalaError(std::string("Cannot divide ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" by ")  + a.getTypeIndefArt() + b.getTypeStr());
    }
-   return SalaObj();
 }
 // assume already bools (use convert to bool first)
 inline bool operator && (SalaObj& a, SalaObj& b)
@@ -565,7 +556,6 @@ inline bool operator == (SalaObj& a, SalaObj& b)
       case SalaObj::S_LIST: return a.data.list == b.data.list;
       default: throw SalaError(std::string("Cannot compare ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" with ") + b.getTypeIndefArt() + b.getTypeStr() + std::string(" using '=='"));
    }
-   return false;
 }
 inline SalaObj op_is(SalaObj& a, SalaObj& b)
 {
@@ -594,7 +584,6 @@ inline bool operator != (SalaObj& a, SalaObj& b)
       case SalaObj::S_LIST: return a.data.list != b.data.list;
       default: throw SalaError(std::string("Cannot compare ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" with ") + b.getTypeIndefArt() + b.getTypeStr() + std::string(" using '!='"));
    }
-   return false;
 }
 inline bool operator < (SalaObj& a, SalaObj& b)
 {
@@ -607,7 +596,6 @@ inline bool operator < (SalaObj& a, SalaObj& b)
       case SalaObj::S_STRING: return a.data.str < b.data.str;
       default: throw SalaError(std::string("Cannot compare ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" with ") + b.getTypeIndefArt() + b.getTypeStr() + std::string(" using '<'"));
    }
-   return false;
 }
 inline bool operator > (SalaObj& a, SalaObj& b)
 {
@@ -620,7 +608,6 @@ inline bool operator > (SalaObj& a, SalaObj& b)
       case SalaObj::S_STRING: return a.data.str > b.data.str;
       default: throw SalaError(std::string("Cannot compare ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" with ") + b.getTypeIndefArt() + b.getTypeStr() + std::string(" using '>'"));
    }
-   return false;
 }
 inline bool operator <= (SalaObj& a, SalaObj& b)
 {
@@ -632,7 +619,6 @@ inline bool operator <= (SalaObj& a, SalaObj& b)
          return (a.type == SalaObj::S_INT) ? (double(a.data.i) <= b.data.f) : (a.data.f <= double(b.data.i));
       default: throw SalaError(std::string("Cannot compare ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" with ") + b.getTypeIndefArt() + b.getTypeStr() + std::string(" using '<='"));
    }
-   return false;
 }
 inline bool operator >= (SalaObj& a, SalaObj& b)
 {
@@ -644,7 +630,6 @@ inline bool operator >= (SalaObj& a, SalaObj& b)
          return (a.type == SalaObj::S_INT) ? (double(a.data.i) >= b.data.f) : (a.data.f >= double(b.data.i));
       default: throw SalaError(std::string("Cannot compare ") + a.getTypeIndefArt() + a.getTypeStr() + std::string(" with ") + b.getTypeIndefArt() + b.getTypeStr() + std::string(" using '>='"));
    }
-   return false;
 }
 // list operations: note -> precheck in program and sort into list and string
 inline SalaObj& SalaObj::list_at(int i)
@@ -720,7 +705,6 @@ inline const std::string SalaObj::getTypeIndefArt() const
    default:
       return "an ";  // unknown type
    }
-   return std::string();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

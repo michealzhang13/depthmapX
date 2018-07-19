@@ -261,13 +261,13 @@ namespace depthmapX {
         std::getline(stream, inputline);
 
         // check for a matching delimited header line...
-        auto strings = dXstring::split(inputline, delimiter);
-        if (strings.size() < 2) {
+        auto headers = dXstring::split(inputline, delimiter);
+        if (headers.size() < 2) {
             // throw exception
             return table;
         }
 
-        for (auto& columnName: strings) {
+        for (auto& columnName: headers) {
             if (!columnName.empty()) {
                 dXstring::ltrim(columnName,'\"');
                 dXstring::rtrim(columnName,'\"');
@@ -279,17 +279,17 @@ namespace depthmapX {
         while (!stream.eof()) {
             std::getline(stream, inputline);
             if (!inputline.empty()) {
-                auto strings = dXstring::split(inputline, delimiter);
-                if(strings.size() != columns.size()) {
+                auto values = dXstring::split(inputline, delimiter);
+                if(values.size() != columns.size()) {
                     std::stringstream message;
                     message << "Cells in line " << inputline << "not the same number as the columns" << std::flush;
                     throw RuntimeException(message.str().c_str());
                 }
-                if (!strings.size()) {
+                if (!values.size()) {
                     continue;
                 }
-                for (size_t i = 0; i < strings.size(); i++) {
-                    table[columns[i]].push_back(strings[i]);
+                for (size_t i = 0; i < values.size(); i++) {
+                    table[columns[i]].push_back(values[i]);
                 }
             }
         }

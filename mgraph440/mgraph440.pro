@@ -5,6 +5,8 @@ QT       -= qt
 QT -= gui
 CONFIG   -= qt warn_on
 
+# suppress warning about std::set<int>
+win32: QMAKE_CXXFLAGS += -wd4800
 
 CONFIG += staticlib c++11 console
 CONFIG -= app_bundle

@@ -13,4 +13,5 @@ Debug:RCC_DIR = debug/.rcc
 Debug:UI_DIR = debug/.ui
 
 win32: QMAKE_CXXFLAGS_WARN_ON -= -W3
-win32: QMAKE_CXXFLAGS_WARN_ON += -W4
+# set warning level to 4 for MSVC, but disable 4800 (this gets triggered for all std::set<int> calls)
+win32: QMAKE_CXXFLAGS_WARN_ON += -W4 -wd4800

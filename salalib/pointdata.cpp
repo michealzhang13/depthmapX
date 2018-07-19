@@ -850,7 +850,6 @@ PafColor PointMap::getPointColor(PixelRef pixelRef) const
          return PafColor();
       }
    }
-   return PafColor();   // <- note alpha channel set to transparent - will not be drawn
 }
 
 PafColor PointMap::getCurrentPointColor() const
@@ -1581,7 +1580,7 @@ bool PointMap::analyseVisual(Communicator *comm, Options& options, bool simple_v
       comm->CommPostMessage( Communicator::NUM_RECORDS, m_filled_point_count );
    }
 
-   int cluster_col, control_col, controllability_col;
+   int cluster_col = -1, control_col = -1, controllability_col = -1;
    if(!simple_version) {
        if (options.local) {
            cluster_col = m_attributes.insertColumn("Visual Clustering Coefficient");
@@ -1590,7 +1589,7 @@ bool PointMap::analyseVisual(Communicator *comm, Options& options, bool simple_v
        }
    }
 
-   int entropy_col, rel_entropy_col, integ_dv_col, integ_pv_col, integ_tk_col, depth_col, count_col;
+   int entropy_col = -1, rel_entropy_col = -1, integ_dv_col = -1, integ_pv_col = -1, integ_tk_col = -1, depth_col = -1, count_col = -1;
    if (options.global) {
       std::string radius_text;
       if (options.radius != -1) {
@@ -1771,9 +1770,9 @@ bool PointMap::analyseVisual(Communicator *comm, Options& options, bool simple_v
                int cluster = 0;
                float control = 0.0f;
 
-               for (size_t i = 0; i < neighbourhood.size(); i++) {
+               for (size_t nbh = 0; nbh < neighbourhood.size(); nbh++) {
                   int intersect_size = 0, retro_size = 0;
-                  Point& retpt = getPoint(neighbourhood[i]);
+                  Point& retpt = getPoint(neighbourhood[nbh]);
                   if (retpt.filled() && retpt.m_node) {
                      retpt.m_node->first();
                      while (!retpt.m_node->is_tail()) {
@@ -1864,8 +1863,8 @@ bool PointMap::analyseVisualPointDepth(Communicator *comm)
                if (!p.m_merge.empty()) {
                   Point& p2 = getPoint(p.m_merge);
                   if (p2.m_misc != ~0) {
-                     int row = m_attributes.getRowid(p.m_merge);
-                     m_attributes.setValue(row,col,float(level));
+                     int targetRow = m_attributes.getRowid(p.m_merge);
+                     m_attributes.setValue(targetRow,col,float(level));
                      p2.m_node->extractUnseen(search_tree[level+1],this,p2.m_misc); // did say p.misc
                      p2.m_misc = ~0;
                   }
@@ -2007,7 +2006,7 @@ bool PointMap::analyseMetricPointDepth(Communicator *comm)
    // n.b., insert columns sets values to -1 if the column already exists
    int path_angle_col = m_attributes.insertColumn("Metric Step Shortest-Path Angle");
    int path_length_col = m_attributes.insertColumn("Metric Step Shortest-Path Length");
-   int dist_col;
+   int dist_col = -1;
    if (m_selection_set.size() == 1) {
       // Note: Euclidean distance is currently only calculated from a single point
       dist_col = m_attributes.insertColumn("Metric Straight-Line Distance");
@@ -2049,12 +2048,12 @@ bool PointMap::analyseMetricPointDepth(Communicator *comm)
             Point& p2 = getPoint(p.m_merge);
             if (p2.m_misc != ~0) {
                p2.m_cumangle = p.m_cumangle;
-               int row = m_attributes.getRowid(p.m_merge);
-               m_attributes.setValue(row, path_length_col, float(m_spacing * here.dist) );
-               m_attributes.setValue(row, path_angle_col, float(p2.m_cumangle) );
+               int targetRow = m_attributes.getRowid(p.m_merge);
+               m_attributes.setValue(targetRow, path_length_col, float(m_spacing * here.dist) );
+               m_attributes.setValue(targetRow, path_angle_col, float(p2.m_cumangle) );
                if (m_selection_set.size() == 1) {
                   // Note: Euclidean distance is currently only calculated from a single point
-                  m_attributes.setValue(row, dist_col, float(m_spacing * dist(p.m_merge,*m_selection_set.begin())) );
+                  m_attributes.setValue(targetRow, dist_col, float(m_spacing * dist(p.m_merge,*m_selection_set.begin())) );
                }
                p2.m_node->extractMetric(search_list,this,MetricTriple(here.dist,p.m_merge,NoPixel));
                p2.m_misc = ~0;
@@ -2219,8 +2218,8 @@ bool PointMap::analyseAngularPointDepth(Communicator *comm)
             Point& p2 = getPoint(p.m_merge);
             if (p2.m_misc != ~0) {
                p2.m_cumangle = p.m_cumangle;
-               int row = m_attributes.getRowid(p.m_merge);
-               m_attributes.setValue(row, path_angle_col, float(p2.m_cumangle) );
+               int targetRow = m_attributes.getRowid(p.m_merge);
+               m_attributes.setValue(targetRow, path_angle_col, float(p2.m_cumangle) );
                p2.m_node->extractAngular(search_list,this,AngularTriple(here.angle,p.m_merge,NoPixel));
                p2.m_misc = ~0;
             }
@@ -2317,10 +2316,10 @@ bool PointMap::mergePoints(const Point2f& p)
    }
 
    // note that in a multiple selection, the point p is adjusted by the selection bounds
-   PixelRef bl = pixelate(m_sel_bounds.bottom_left);
-   PixelRef tr = pixelate(m_sel_bounds.top_right);
+   PixelRef bl_loc = pixelate(m_sel_bounds.bottom_left);
+   PixelRef tr_loc = pixelate(m_sel_bounds.top_right);
    //
-   PixelRef offset = pixelate(p) - PixelRef(tr.x,bl.y);
+   PixelRef offset = pixelate(p) - PixelRef(tr_loc.x,bl_loc.y);
    //
    for (auto& sel: m_selection_set) {
       PixelRef a = sel;
@@ -2444,27 +2443,27 @@ void PointMap::addGridConnections()
       PixelRef node = curs.right();
       Point& point = getPoint(curs);
       point.m_grid_connections = 0;
-      for (int i = 0; i < 32; i += 4) {
-         Bin& bin = point.m_node->bin(i);
+      for (int j = 0; j < 32; j += 4) {
+         Bin& bin = point.m_node->bin(j);
          bin.first();
          while (!bin.is_tail()) {
             if (node == bin.cursor()) {
-               point.m_grid_connections |= (1 << (i / 4));
+               point.m_grid_connections |= (1 << (j / 4));
                break;
             }
             bin.next();
          }
          char dir;
-         if (i == 0) {
+         if (j == 0) {
             dir = PixelRef::VERTICAL;
          }
-         else if (i == 4 || i == 8) {
+         else if (j == 4 || j == 8) {
             dir = PixelRef::NEGHORIZONTAL;
          }
-         else if (i == 12 || i == 16) {
+         else if (j == 12 || j == 16) {
             dir = PixelRef::NEGVERTICAL;
          }
-         else if (i == 20 || i == 24) {
+         else if (j == 20 || j == 24) {
             dir = PixelRef::HORIZONTAL;
          }
          node.move(dir);

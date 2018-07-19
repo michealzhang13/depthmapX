@@ -14,7 +14,15 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "catch.hpp"
-#include "Catch/fakeit.hpp"
+#ifdef _WIN32
+#pragma warning (push)
+#pragma warning (disable: 4100)
+#pragma warning (disable: 4515)
+#endif
+#include <Catch/fakeit.hpp>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 #include "../depthmapXcli/commandlineparser.h"
 #include "../depthmapXcli/imodeparser.h"
 #include "../depthmapXcli/imodeparserfactory.h"

@@ -38,7 +38,7 @@ public:
     virtual ~LayerManager(){}
 
 public:
-    class OutOfLayersException : depthmapX::BaseException
+    class OutOfLayersException : public depthmapX::BaseException
     {
     public:
         OutOfLayersException()
@@ -48,7 +48,7 @@ public:
         }
     };
 
-    class DuplicateKeyException : depthmapX::BaseException
+    class DuplicateKeyException : public depthmapX::BaseException
     {
     public:
         DuplicateKeyException()

@@ -1740,15 +1740,15 @@ bool MetaGraph::pushValuesToLayer(int sourcetype, int sourcelayer, int desttype,
       }
 
       for (size_t i = 0; i < table_out.getRowCount(); i++) {
-         if (!table_out.isVisible(i)) {
+         if (!table_out.isVisible(static_cast<int>(i))) {
             continue;
          }
          if (push_func == PUSH_FUNC_AVG && vals[i] != -1.0) {
             vals[i] /= double(counts[i]);
          }
-         table_out.setValue(i,col_out,float(vals[i]));
+         table_out.setValue(static_cast<int>(i),col_out,float(vals[i]));
          if (count_col) {
-            table_out.setValue(i,col_count,float(counts[i]));
+            table_out.setValue(static_cast<int>(i),col_count,float(counts[i]));
          }
       }
 
