@@ -758,7 +758,6 @@ bool ShapeGraph::read(std::istream &stream, int version )
    m_selection = false;
    m_map_type = ShapeMap::EMPTYMAP;
 
-   bool segmentmap = false;
    // note that keyvertexcount and keyvertices are different things! (length keyvertices not the same as keyvertexcount!)
    stream.read((char *)&m_keyvertexcount,sizeof(m_keyvertexcount));
    int size;
@@ -1374,7 +1373,6 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const std::set<double>& radi
       }
       std::vector<std::pair<float,SegmentData> > anglebins;
       anglebins.push_back(std::make_pair(0.0f,SegmentData(0,i,SegmentRef(),0,0.0,0)));
-      Connector& thisline = m_connectors[i];
       std::vector<double> total_depth;
       std::vector<int> node_count;
       for (size_t r = 0; r < radii.size(); r++) {

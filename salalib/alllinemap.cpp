@@ -25,8 +25,6 @@ AllLineMap::AllLineMap(Communicator *comm,
    // for ease, I'm just going to make a construction line set from all the visible lines...
 
    QtRegion region;
-   int size = 0;
-
    std::vector<Line> lines;
 
    // add all visible layers to the set of polygon lines...
@@ -242,10 +240,10 @@ std::tuple<std::unique_ptr<ShapeGraph>, std::unique_ptr<ShapeGraph>> AllLineMap:
    minimiser.removeSubsets(ax_seg_cuts, radialsegs, radialdivisions, m_radial_lines, keyvertexconns, keyvertexcounts);
 
    // make new lines here (assumes line map has only lines)
-   int k = -1;
+   int kl = -1;
    for (auto& shape: m_shapes) {
-      k++;
-      if (!minimiser.removed(k)) {
+      kl++;
+      if (!minimiser.removed(kl)) {
          lines_s.push_back( shape.second.getLine() );
       }
    }

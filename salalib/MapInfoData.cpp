@@ -44,8 +44,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
    // 
    std::vector<std::string> colnames;
    pvecint readable, colindexes;
-   size_t i;
-   for (i = 0; i < columnheads.size(); i++) {
+   for (int i = 0; i < columnheads.size(); i++) {
       dXstring::ltrim(columnheads[i]);
       auto tokens = dXstring::split(columnheads[i], ' ',true);
       if (dXstring::beginsWith<std::string>(tokens[1],"Integer")
@@ -59,7 +58,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
       }
    }
 
-   for (i = 0; i < colnames.size(); i++) {
+   for (int i = 0; i < colnames.size(); i++) {
       colindexes.push_back(table.getColumnIndex(colnames[i]));
    }
 
@@ -123,8 +122,8 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
             for (int j = 0; j < count; j++) {
                dXstring::safeGetline(miffile, textline);
                dXstring::ltrim(textline);
-               auto tokens = dXstring::split(textline,' ',true);
-               pointsets.back().push_back(Point2f(stod(tokens[0]),stod(tokens[1])));
+               auto tTokens = dXstring::split(textline,' ',true);
+               pointsets.back().push_back(Point2f(stod(tTokens[0]),stod(tTokens[1])));
             }
             if (i != 0) {
                // warn about extraneous pline data
@@ -144,7 +143,7 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
    int lastrow = -1;
 
    QtRegion region(pointsets[0][0],pointsets[0][0]);
-   for (i = 0; i < pointsets.size(); i++) {
+   for (int i = 0; i < pointsets.size(); i++) {
       for (size_t j = 0; j < pointsets[i].size(); j++) {
          region.encompass(pointsets[i][j]);
       }
@@ -164,8 +163,8 @@ int MapInfoData::import(std::istream& miffile, std::istream& midfile, ShapeMap& 
          // table data entries:
          if (nextduplicate < duplicates.size() && duplicates[nextduplicate] == i) {
             // duplicate last row:
-            for (size_t i = 0; i < colindexes.size(); i++) {
-               table.setValue(row,colindexes[i],table.getValue(lastrow,colindexes[i]));
+            for (size_t j = 0; j < colindexes.size(); j++) {
+               table.setValue(row,colindexes[j],table.getValue(lastrow,colindexes[j]));
             }
             nextduplicate++;
          }

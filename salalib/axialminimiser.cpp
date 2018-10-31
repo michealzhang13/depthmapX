@@ -5,7 +5,6 @@ static int compareValueTriplet(const void *p1, const void *p2)
 {
    ValueTriplet *vp1 = (ValueTriplet *) p1;
    ValueTriplet *vp2 = (ValueTriplet *) p2;
-   int v = vp1->value1 - vp2->value1;
    return (vp1->value1 > vp2->value1 ? 1 : vp1->value1 < vp2->value1 ? -1 :
           (vp1->value2 > vp2->value2 ? 1 : vp1->value2 < vp2->value2 ? -1 : 0));
 }
@@ -37,8 +36,6 @@ void AxialMinimiser::removeSubsets(std::map<int, std::set<int> >& axsegcuts, std
                                    std::vector<std::vector<int> >& keyvertexconns, std::vector<int>& keyvertexcounts)
 {
    bool removedflag = true;
-   int counterrors = 0;
-
    m_axialconns = m_alllinemap->m_connectors;
 
    for (size_t x = 0; x < radialsegs.size(); x++) {
@@ -197,8 +194,7 @@ void AxialMinimiser::fewestLongest(std::map<int, std::set<int> > &axsegcuts, std
       int j = m_vps[i].index;
       // vital connections code (uses original unaltered connections)
       bool vitalconn = false;
-      size_t k;
-      for (k = 0; k < keyvertexconns[j].size(); k++) {
+      for (size_t k = 0; k < keyvertexconns[j].size(); k++) {
          // first check to see if removing this line will cause elimination of a vital connection
          if (keyvertexcounts[keyvertexconns[j][k]] <= 1) {
             // connect vital... just go on to the next one:

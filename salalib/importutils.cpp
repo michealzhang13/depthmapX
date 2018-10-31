@@ -98,14 +98,14 @@ namespace depthmapX {
                         *communicator >> dp;
                     }
                     catch (Communicator::CancelledException) {
-                        return 0;
+                        return false;
                     }
                     catch (pexception) {
-                        return -1;
+                        return false;
                     }
 
                     if (communicator->IsCancelled()) {
-                        return 0;
+                        return false;
                     }
                 }
                 else {
@@ -152,19 +152,19 @@ namespace depthmapX {
         int xcol = -1, ycol = -1, x1col = -1, y1col = -1, x2col = -1, y2col = -1, refcol = -1;
         for(auto const& column: table) {
             if (column.first == "x" || column.first == "easting")
-                xcol = columns.size();
+                xcol = static_cast<int>(columns.size());
             else if (column.first == "y" || column.first == "northing")
-                ycol = columns.size();
+                ycol = static_cast<int>(columns.size());
             else if (column.first == "x1")
-                x1col = columns.size();
+                x1col = static_cast<int>(columns.size());
             else if (column.first == "x2")
-                x2col = columns.size();
+                x2col = static_cast<int>(columns.size());
             else if (column.first == "y1")
-                y1col = columns.size();
+                y1col = static_cast<int>(columns.size());
             else if (column.first == "y2")
-                y2col = columns.size();
+                y2col = static_cast<int>(columns.size());
             else if (column.first == "Ref")
-                refcol = columns.size();
+                refcol = static_cast<int>(columns.size());
             columns.push_back(column.first);
         }
 
@@ -279,17 +279,17 @@ namespace depthmapX {
         while (!stream.eof()) {
             std::getline(stream, inputline);
             if (!inputline.empty()) {
-                auto strings = dXstring::split(inputline, delimiter);
-                if(strings.size() != columns.size()) {
+                auto lineTokens = dXstring::split(inputline, delimiter);
+                if(lineTokens.size() != columns.size()) {
                     std::stringstream message;
                     message << "Cells in line " << inputline << "not the same number as the columns" << std::flush;
                     throw RuntimeException(message.str().c_str());
                 }
-                if (!strings.size()) {
+                if (!lineTokens.size()) {
                     continue;
                 }
-                for (size_t i = 0; i < strings.size(); i++) {
-                    table[columns[i]].push_back(strings[i]);
+                for (size_t i = 0; i < lineTokens.size(); i++) {
+                    table[columns[i]].push_back(lineTokens[i]);
                 }
             }
         }

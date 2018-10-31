@@ -266,8 +266,6 @@ bool PointMap::blockLines()
    // just ensure lines don't exist to start off with (e.g., if someone's been playing with the visible layers)
    unblockLines();
 
-   size_t count = 0;
-
    // This used to use a packed Linekey (file, layer, line), but
    // would require a key with (file, layer, shaperef, seg) when used with shaperef,
    // so just switched to an integer key:
@@ -662,7 +660,6 @@ void PointMap::outputBinSummaries(std::ostream& myout)
    }
    myout << std::endl;
 
-   int count = 0;
    for (int i = 0; i < m_cols; i++) {
       for (int j = 0; j < m_rows; j++) {
 
@@ -855,7 +852,6 @@ PafColor PointMap::getPointColor(PixelRef pixelRef) const
          return PafColor();
       }
    }
-   return PafColor();   // <- note alpha channel set to transparent - will not be drawn
 }
 
 PafColor PointMap::getCurrentPointColor() const
@@ -1044,7 +1040,7 @@ bool PointMap::read(std::istream& stream, int version )
               m_bottom_left.y+double(m_rows-1)*m_spacing + m_spacing/2.0) );
 
    // for old data versions:
-   int attr_count = -1, which_attributes = -1;
+   int attr_count = -1;
 
    int displayed_attribute;  // n.b., temp variable necessary to force recalc below
 
@@ -1299,7 +1295,6 @@ bool PointMap::sparkPixel2(PixelRef curs, int make, double maxdist)
       far_bin_dists[i] = 0.0f;
    }
    int neighbourhood_size = 0;
-   int max_depth = 0;
    double total_dist = 0.0;
    double total_dist_sqr = 0.0;
 
@@ -1494,8 +1489,6 @@ bool PointMap::binDisplay(Communicator *comm)
    for (auto& sel: m_selection_set) {
       Point& p = getPoint(sel);
       // Code for colouring pretty bins:
-      int count = 1;
-      int dir = 0;
       for (int i = 0; i < 32; i++) {
          Bin& b = p.m_node->bin(i);
          b.first();
@@ -1784,9 +1777,9 @@ bool PointMap::analyseVisual(Communicator *comm, Options& options, bool simple_v
                int cluster = 0;
                float control = 0.0f;
 
-               for (size_t i = 0; i < neighbourhood.size(); i++) {
+               for (auto neighbour : neighbourhood) {
                   int intersect_size = 0, retro_size = 0;
-                  Point& retpt = getPoint(neighbourhood[i]);
+                  Point& retpt = getPoint(neighbour);
                   if (retpt.filled() && retpt.m_node) {
                      retpt.m_node->first();
                      while (!retpt.m_node->is_tail()) {
@@ -1877,8 +1870,8 @@ bool PointMap::analyseVisualPointDepth(Communicator *comm)
                if (!p.m_merge.empty()) {
                   Point& p2 = getPoint(p.m_merge);
                   if (p2.m_misc != ~0) {
-                     int row = m_attributes.getRowid(p.m_merge);
-                     m_attributes.setValue(row,col,float(level));
+                     int row2 = m_attributes.getRowid(p.m_merge);
+                     m_attributes.setValue(row2,col,float(level));
                      p2.m_node->extractUnseen(search_tree[level+1],this,p2.m_misc); // did say p.misc
                      p2.m_misc = ~0;
                   }
@@ -1963,7 +1956,6 @@ bool PointMap::analyseMetric(Communicator *comm, Options& options)
 
             std::set<MetricTriple> search_list;
             search_list.insert(MetricTriple(0.0f,curs,NoPixel));
-            int level = 0;
             while (search_list.size()) {
                std::set<MetricTriple>::iterator it = search_list.begin();
                MetricTriple here = *it;
@@ -2043,8 +2035,6 @@ bool PointMap::analyseMetricPointDepth(Communicator *comm)
 
    // note that m_misc is used in a different manner to analyseGraph / PointDepth
    // here it marks the node as used in calculation only
-   int count = 0;
-   int level = 0;
    while (search_list.size()) {
       std::set<MetricTriple>::iterator it = search_list.begin();
       MetricTriple here = *it;
@@ -2065,12 +2055,12 @@ bool PointMap::analyseMetricPointDepth(Communicator *comm)
             Point& p2 = getPoint(p.m_merge);
             if (p2.m_misc != ~0) {
                p2.m_cumangle = p.m_cumangle;
-               int row = m_attributes.getRowid(p.m_merge);
-               m_attributes.setValue(row, path_length_col, float(m_spacing * here.dist) );
-               m_attributes.setValue(row, path_angle_col, float(p2.m_cumangle) );
+               int row2 = m_attributes.getRowid(p.m_merge);
+               m_attributes.setValue(row2, path_length_col, float(m_spacing * here.dist) );
+               m_attributes.setValue(row2, path_angle_col, float(p2.m_cumangle) );
                if (m_selection_set.size() == 1) {
                   // Note: Euclidean distance is currently only calculated from a single point
-                  m_attributes.setValue(row, dist_col, float(m_spacing * dist(p.m_merge,*m_selection_set.begin())) );
+                  m_attributes.setValue(row2, dist_col, float(m_spacing * dist(p.m_merge,*m_selection_set.begin())) );
                }
                p2.m_node->extractMetric(search_list,this,MetricTriple(here.dist,p.m_merge,NoPixel));
                p2.m_misc = ~0;
@@ -2148,7 +2138,6 @@ bool PointMap::analyseAngular(Communicator *comm, Options& options)
             std::set<AngularTriple> search_list;
             search_list.insert(AngularTriple(0.0f,curs,NoPixel));
             getPoint(curs).m_cumangle = 0.0f;
-            int level = 0;
             while (search_list.size()) {
                std::set<AngularTriple>::iterator it = search_list.begin();
                AngularTriple here = *it;
@@ -2221,8 +2210,6 @@ bool PointMap::analyseAngularPointDepth(Communicator *comm)
 
    // note that m_misc is used in a different manner to analyseGraph / PointDepth
    // here it marks the node as used in calculation only
-   int count = 0;
-   int level = 0;
    while (search_list.size()) {
       std::set<AngularTriple>::iterator it = search_list.begin();
       AngularTriple here = *it;
@@ -2238,8 +2225,7 @@ bool PointMap::analyseAngularPointDepth(Communicator *comm)
             Point& p2 = getPoint(p.m_merge);
             if (p2.m_misc != ~0) {
                p2.m_cumangle = p.m_cumangle;
-               int row = m_attributes.getRowid(p.m_merge);
-               m_attributes.setValue(row, path_angle_col, float(p2.m_cumangle) );
+               m_attributes.setValue(m_attributes.getRowid(p.m_merge), path_angle_col, float(p2.m_cumangle) );
                p2.m_node->extractAngular(search_list,this,AngularTriple(here.angle,p.m_merge,NoPixel));
                p2.m_misc = ~0;
             }
@@ -2336,10 +2322,10 @@ bool PointMap::mergePoints(const Point2f& p)
    }
 
    // note that in a multiple selection, the point p is adjusted by the selection bounds
-   PixelRef bl = pixelate(m_sel_bounds.bottom_left);
-   PixelRef tr = pixelate(m_sel_bounds.top_right);
+   PixelRef lbl = pixelate(m_sel_bounds.bottom_left);
+   PixelRef ltr = pixelate(m_sel_bounds.top_right);
    //
-   PixelRef offset = pixelate(p) - PixelRef(tr.x,bl.y);
+   PixelRef offset = pixelate(p) - PixelRef(ltr.x,lbl.y);
    //
    for (auto& sel: m_selection_set) {
       PixelRef a = sel;
@@ -2463,27 +2449,27 @@ void PointMap::addGridConnections()
       PixelRef node = curs.right();
       Point& point = getPoint(curs);
       point.m_grid_connections = 0;
-      for (int i = 0; i < 32; i += 4) {
-         Bin& bin = point.m_node->bin(i);
+      for (int j = 0; j < 32; j += 4) {
+         Bin& bin = point.m_node->bin(j);
          bin.first();
          while (!bin.is_tail()) {
             if (node == bin.cursor()) {
-               point.m_grid_connections |= (1 << (i / 4));
+               point.m_grid_connections |= (1 << (j / 4));
                break;
             }
             bin.next();
          }
          char dir;
-         if (i == 0) {
+         if (j == 0) {
             dir = PixelRef::VERTICAL;
          }
-         else if (i == 4 || i == 8) {
+         else if (j == 4 || j == 8) {
             dir = PixelRef::NEGHORIZONTAL;
          }
-         else if (i == 12 || i == 16) {
+         else if (j == 12 || j == 16) {
             dir = PixelRef::NEGVERTICAL;
          }
-         else if (i == 20 || i == 24) {
+         else if (j == 20 || j == 24) {
             dir = PixelRef::HORIZONTAL;
          }
          node.move(dir);

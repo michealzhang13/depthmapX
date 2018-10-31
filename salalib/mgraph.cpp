@@ -1618,6 +1618,7 @@ ShapeMap &MetaGraph::createNewShapeMap(depthmapX::ImportType mapType, std::strin
             return m_dataMaps.back();
         }
     }
+    throw depthmapX::RuntimeException("Unexpected map type");
 }
 
 void MetaGraph::deleteShapeMap(depthmapX::ImportType mapType, ShapeMap &shapeMap) {
@@ -1784,8 +1785,7 @@ bool MetaGraph::pushValuesToLayer(int sourcetype, int sourcelayer, int desttype,
       double *vals = new double [table_out.getRowCount()];
       int *counts = new int [table_out.getRowCount()];
 
-      int i;
-      for (i = 0; i < table_out.getRowCount(); i++) {
+      for (int i = 0; i < table_out.getRowCount(); i++) {
          counts[i] = 0; // count set to zero for all
          vals[i] = -1;
       }
@@ -1842,7 +1842,7 @@ bool MetaGraph::pushValuesToLayer(int sourcetype, int sourcelayer, int desttype,
          }
       }
 
-      for (i = 0; i < table_out.getRowCount(); i++) {
+      for (int i = 0; i < table_out.getRowCount(); i++) {
          if (!table_out.isVisible(i)) {
             continue;
          }
@@ -2068,7 +2068,7 @@ void MetaGraph::undo()
 
 int MetaGraph::addAttribute(const std::string& name)
 {
-   int col;
+   int col = -1;
    switch (m_view_class & VIEWFRONT) {
    case VIEWVGA:
       col = getDisplayedPointMap().addAttribute(name);

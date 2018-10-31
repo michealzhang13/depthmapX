@@ -842,8 +842,8 @@ bool ShapeMap::polyAppend(int shape_ref, const Point2f& point)
    }
    else {
       // pixelate all polys in the pixel new structure:
-      for (auto shape: m_shapes) {
-         makePolyPixels(shape.first);
+      for (auto sh: m_shapes) {
+         makePolyPixels(sh.first);
       }
    }
 
@@ -1387,7 +1387,7 @@ void ShapeMap::removePolyPixels(int polyref)
 
 int ShapeMap::moveDir(int side)
 {
-   int dir;
+   int dir = 0;
    switch (side)
    {
    case ShapeRef::SHAPE_L:
@@ -1630,9 +1630,9 @@ std::vector<int> ShapeMap::polyInPolyList(int polyref, double tolerance) const
                   // this has us in it, now looked through everything else:
                    for (auto& shaperefb: pixShapes) {
                      if (shaperef != shaperefb && testedlist.searchindex(shaperefb.m_shape_ref) == paftl::npos) {
-                        auto shapeIter = m_shapes.find(shaperefb.m_shape_ref);
-                        size_t indexb = std::distance(m_shapes.begin(), shapeIter);
-                        const SalaShape& polyb = shapeIter->second;
+                        auto shIter = m_shapes.find(shaperefb.m_shape_ref);
+                        size_t indexb = std::distance(m_shapes.begin(), shIter);
+                        const SalaShape& polyb = shIter->second;
                         if (polyb.isPoint()) {
                            if (testPointInPoly(polyb.getPoint(),shaperef) != -1) {
                               shapeindexlist.push_back(int(indexb));
@@ -1770,10 +1770,10 @@ int ShapeMap::testPointInPoly(const Point2f& p, const ShapeRef& shape) const
       const SalaShape& poly = shapeIter->second;
       if (poly.m_region.contains_touch(p)) {
          // next simplest, on the outside border:
-         int alpha = 0;
-         int counter = 0;
-         int parity = 0;
          if (shape.m_tags & ShapeRef::SHAPE_EDGE) {
+             int alpha = 0;
+             int counter = 0;
+             int parity = 0;
             // run a test line to the edge:
             if (shape.m_tags & (ShapeRef::SHAPE_L | ShapeRef::SHAPE_R)) {
                if (shape.m_tags & ShapeRef::SHAPE_L) {

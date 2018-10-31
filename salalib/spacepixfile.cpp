@@ -57,7 +57,7 @@ bool SpacePixelFile::write( std::ofstream& stream, int version )
    stream.write( (char *) &m_region, sizeof(m_region) );
 
    // Quick mod - TV
-   int count = m_spacePixels.size();
+   int count = static_cast<int>(m_spacePixels.size());
    stream.write( (char *) &count, sizeof(count) );
    for (auto& spacePixel: m_spacePixels) {
       spacePixel.write(stream,version);

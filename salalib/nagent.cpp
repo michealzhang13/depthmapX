@@ -114,8 +114,6 @@ void AgentEngine::run(Communicator *comm, PointMap *pointmap)
    }
 
    for (int i = 0; i < m_timesteps; i++) {
-
-      size_t j;
       for (auto& agentSet: agentSets) {
          int q = invcumpoisson(prandomr(),agentSet.m_release_rate);
          int length = agentSet.agents.size();
@@ -1068,7 +1066,6 @@ Point2f Agent::onLoSLook(bool wholeisovist, int look_type)
    int bbin = -1;
    if (m_program->m_destination_directed) {
       Point2f vec2 = m_destination - m_loc;
-      double test = vec2.length();
       vec2.normalise();
       bbin = binfromvec(vec2);
    }

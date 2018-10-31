@@ -51,7 +51,8 @@ AttributeTable::AttributeTable(const std::string& name)
    //
    // everything apart from the default layer is available for use:
    // Quick mod - TV
-   m_available_layers = (0xffffffff << 31) + 0xfffffffe;
+   m_available_layers = 0xffffffffLL << 31;
+   m_available_layers += 0xfffffffeLL;
    // display the default layer only (everything):
    m_visible_layers = 0x1;
    m_layers.add(1,"Everything");
@@ -266,7 +267,7 @@ bool AttributeTable::selectionToLayer(const std::string& name)
       // too many layers -- maximum 64
       return false;
    }
-   int64 newlayer = 0x1 << loc;
+   int64 newlayer = 0x1i64 << loc;
    // now layer has been found, eliminate from available layers 
    // and add a lookup for the name
    m_available_layers = (m_available_layers & (~newlayer));
@@ -451,26 +452,26 @@ bool AttributeTable::importTable(std::istream& stream, bool merge)
    while (!stream.eof()) {
       stream >> inputline;
       if (!inputline.empty()) {
-         auto strings = dXstring::split(inputline, '\t');
-         if (!strings.size()) {
+         auto tokens = dXstring::split(inputline, '\t');
+         if (!tokens.size()) {
             continue;
          }
-         if (strings.size() != 1 + colrefs.size()) {
+         if (tokens.size() != 1 + colrefs.size()) {
             return false;
          }
          try {
-            int ref = std::stoi(strings[0]);
+            int ref = std::stoi(tokens[0]);
             int rowid = getRowid(ref);
             if (rowid != -1) {
-               for (size_t i = 1; i < strings.size(); i++) {
+               for (size_t i = 1; i < tokens.size(); i++) {
                   if (merge) { //EF setValue only if not merge
-                     auto value = std::stof(strings[i]);
+                     auto value = std::stof(tokens[i]);
                      if (value != -1.0) { // only add the value if not -1.0
                         incrValue(rowid,colrefs[i-1],value);
                      }
                   }
                   else {
-                     setValue(rowid,colrefs[i-1],std::stof(strings[i]));
+                     setValue(rowid,colrefs[i-1],std::stof(tokens[i]));
                   }
                }
             }
