@@ -61,7 +61,7 @@ bool Connector::write( std::ofstream& stream )
 
 int Connector::count(int mode) const
 {
-   int c = 0;
+   size_t c = 0;
    switch (mode) {
    case CONN_ALL:
       c = m_connections.size();
@@ -76,7 +76,7 @@ int Connector::count(int mode) const
       c = m_back_segconns.size();
       break;
    }
-   return c;
+   return static_cast<int>(c);
 }
 int Connector::getConnectedRef(int cursor, int mode) const
 {

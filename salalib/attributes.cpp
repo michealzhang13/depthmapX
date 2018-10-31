@@ -51,7 +51,7 @@ AttributeTable::AttributeTable(const std::string& name)
    //
    // everything apart from the default layer is available for use:
    // Quick mod - TV
-   m_available_layers = 0xffffffff << 32 + 0xfffffffe;
+   m_available_layers = (0xffffffff << 31) + 0xfffffffe;
    // display the default layer only (everything):
    m_visible_layers = 0x1;
    m_layers.add(1,"Everything");
@@ -73,7 +73,7 @@ int AttributeTable::insertColumn(const std::string& name)
       for (size_t i = 0; i < size(); i++) {
          at(i).push_back(-1.0f);
       }
-      m_columns[index].m_physical_col = m_columns.size() - 1;
+      m_columns[index].m_physical_col = static_cast<int>(m_columns.size()) - 1;
    }
    return index;
 }

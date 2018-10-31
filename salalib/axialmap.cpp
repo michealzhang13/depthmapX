@@ -96,9 +96,8 @@ void ShapeGraph::initialiseAttributesAxial()
 {
     m_attributes.clear();
     // note, expects these to be numbered 0, 1...
-    int conn_col = m_attributes.insertLockedColumn("Connectivity");
-    int leng_col = m_attributes.insertLockedColumn("Line Length");
-
+    m_attributes.insertLockedColumn("Connectivity");
+    m_attributes.insertLockedColumn("Line Length");
 }
 
 void ShapeGraph::makeConnections(const KeyVertices &keyvertices)
@@ -177,7 +176,7 @@ void ShapeGraph::outputNet(std::ostream& netfile) const
          netfile << (i * 2 + 2) << " \"" << i << "b\" " << p2.x << " " << p2.y << std::endl;
       }
       netfile << "*Edges" << std::endl;
-      for (size_t i = 0; i < m_shapes.size(); i++) {
+      for (i = 0; i < m_shapes.size(); i++) {
          netfile << (i * 2 + 1) << " " << (i * 2 + 2) << " 2" << std::endl;
       }
       netfile << "*Arcs" << std::endl;
@@ -231,7 +230,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    time_t atime = 0;
    if (comm) {
       qtimer( atime, 0 );
-      comm->CommPostMessage( Communicator::NUM_RECORDS, m_connectors.size() );
+      comm->CommPostMessage( Communicator::NUM_RECORDS, static_cast<long>(m_connectors.size()) );
    }
 
    // note: radius must be sorted lowest to highest, but if -1 occurs ("radius n") it needs to be last...
@@ -261,8 +260,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    }
 
    // first enter the required attribute columns:
-   size_t r;
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text;
       if (radius[r] != -1) {
          radius_text = std::string(" R") + dXstring::formatString(int(radius[r]),"%d");
@@ -342,7 +340,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
    // then look up all the columns... eek:
    pvecint choice_col, n_choice_col, w_choice_col, nw_choice_col, entropy_col, integ_dv_col, integ_pv_col, integ_tk_col, intensity_col,
            depth_col, count_col, rel_entropy_col, penn_norm_col, w_depth_col, total_weight_col, ra_col, rra_col, td_col, harmonic_col;
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text;
       if (radius[r] != -1) {
          radius_text = std::string(" R") + dXstring::formatString(int(radius[r]),"%d");
@@ -409,7 +407,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
          td_col.push_back(m_attributes.getColumnIndex(td_col_text.c_str()));
       }
    }
-   int control_col, controllability_col;
+   int control_col = 0, controllability_col = 0;
    if (local) {
        if(!simple_version) {
            control_col = m_attributes.getColumnIndex("Control");
@@ -474,7 +472,6 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
 
       pvecint depthcounts;
       depthcounts.push_back(0);
-      Connector& thisline = m_connectors[i];
       pflipper<IntPairVector> foundlist;
       foundlist.a().push_back(IntPair(i,-1));
       covered[i] = true;
@@ -498,7 +495,6 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
                audittrail[index][0].previous.ref = previous; // note 0th member used here: can be used individually different radius previous
             }
             Connector& line = m_connectors[index];
-            double control = 0;
             for (size_t k = 0; k < line.m_connections.size(); k++) {
                if (!covered[line.m_connections[k]]) {
                   covered[line.m_connections[k]] = true;
@@ -678,7 +674,7 @@ bool ShapeGraph::integrate(Communicator *comm, const pvecint& radius_list, bool 
             w_total_choice += audittrail[i][r].weighted_choice;
             // n.b., normalise choice according to (n-1)(n-2)/2 (maximum possible through routes)
             double node_count = m_attributes.getValue(i,count_col[r]);
-            double total_weight;
+            double total_weight = 0.0;
             if (weighting_col != -1) {
                 total_weight = m_attributes.getValue(i,total_weight_col[r]);
             }
@@ -1342,8 +1338,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
 
    pvecint depth_col, count_col, total_col;
    // first enter table values
-   size_t r;
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text = makeRadiusText(Options::RADIUS_ANGULAR,radius[r]);
       std::string depth_col_text = std::string("Angular Mean Depth") + radius_text;
       m_attributes.insertColumn(depth_col_text.c_str());
@@ -1353,7 +1348,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
       m_attributes.insertColumn(total_col_text.c_str());
    }
 
-   for (r = 0; r < radius.size(); r++) {
+   for (size_t r = 0; r < radius.size(); r++) {
       std::string radius_text = makeRadiusText(Options::RADIUS_ANGULAR,radius[r]);
       std::string depth_col_text = std::string("Angular Mean Depth") + radius_text;
       depth_col.push_back(m_attributes.getColumnIndex(depth_col_text.c_str()));
@@ -1371,11 +1366,9 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
       }
       pmap<float,SegmentData> anglebins;
       anglebins.add(0.0f,SegmentData(0,i,SegmentRef(),0,0.0,0));
-      Connector& thisline = m_connectors[i];
       pvecdouble total_depth;
       pvecint node_count;
-      size_t r;
-      for (r = 0; r < radius.size(); r++) {
+      for (size_t r = 0; r < radius.size(); r++) {
          total_depth.push_back(0.0);
          node_count.push_back(0);
       }
@@ -1425,7 +1418,7 @@ bool ShapeGraph::analyseAngular(Communicator *comm, const pvecdouble& radius_lis
       // set the attributes for this node:
       int curs_node_count = 0;
       double curs_total_depth = 0.0;
-      for (r = 0; r < radius.size(); r++) {
+      for (size_t r = 0; r < radius.size(); r++) {
          curs_node_count += node_count[r];
          curs_total_depth += total_depth[r];
          m_attributes.setValue(i,count_col[r],float(curs_node_count));
@@ -1544,10 +1537,8 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    std::string tulip_text = std::string("T") + dXstring::formatString(tulip_bins,"%d");
 
    // first enter the required attribute columns:
-   size_t r;
-   for (r = 0; r < radius_unconverted.size(); r++) {
+   for (size_t r = 0; r < radius_unconverted.size(); r++) {
       std::string radius_text = makeRadiusText(radius_type, radius_unconverted[r]);
-      int choice_col = -1, n_choice_col = -1, w_choice_col = -1, nw_choice_col = -1;
       if (choice) {
             //EF routeweight *
             if (routeweight_col != -1) {
@@ -1626,7 +1617,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
    }
    pvecint choice_col, w_choice_col, w_choice_col2, count_col, integ_col, w_integ_col, td_col, w_td_col, total_weight_col;
    // then look them up! eek....
-   for (r = 0; r < radius_unconverted.size(); r++) {
+   for (size_t r = 0; r < radius_unconverted.size(); r++) {
       std::string radius_text = makeRadiusText(radius_type, radius_unconverted[r]);
       if (choice) {
             //EF routeweight *
@@ -1721,7 +1712,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
 
    }
    pvecdouble radius;
-   for (r = 0; r < radius_unconverted.size(); r++) {
+   for (size_t r = 0; r < radius_unconverted.size(); r++) {
       if (radius_type == Options::RADIUS_ANGULAR && radius_unconverted[r] != -1) {
          radius.push_back(floor(radius_unconverted[r] * tulip_bins * 0.5));
       }
@@ -1769,9 +1760,6 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
 
       double rootseglength = m_attributes.getValue(rowid,length_col);
       double rootweight = (weighting_col != -1) ? weights[rowid] : 0.0;
-        //EFEF
-        double rootweight2 = (weighting_col2 != -1) ? weights2[rowid] : 0.0;
-        //EFEF
 
       // setup: direction 0 (both ways), segment i, previous -1, segdepth (step depth) 0, metricdepth 0.5 * rootseglength, bin 0
       SegmentData segmentData(0,rowid,SegmentRef(),0,0.5*rootseglength,radiusmask);
@@ -1782,9 +1770,7 @@ int ShapeGraph::analyseTulip(Communicator *comm, int tulip_bins, bool choice, in
       // this version below is only designed to be used temporarily --
       // could be on an option?
       //bins[0].push_back(SegmentData(0,rowid,SegmentRef(),0,0.0,radiusmask));
-      Connector& thisline = m_connectors[rowid];
       pvecint node_count;
-      double weight = 0.0;
       int depthlevel = 0;
       int opencount = 1;
       size_t currentbin = 0;

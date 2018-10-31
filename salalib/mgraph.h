@@ -216,7 +216,7 @@ public:
    bool canUndo() const;
    void undo();
 
-   size_t m_displayed_datamap = -1;
+   size_t m_displayed_datamap = static_cast<size_t>(-1);
    ShapeMap& getDisplayedDataMap()
    { return m_dataMaps[m_displayed_datamap]; }
    const ShapeMap& getDisplayedDataMap() const

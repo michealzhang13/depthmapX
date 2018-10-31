@@ -47,7 +47,7 @@ namespace EntityParsing {
            }
         }
 
-        int x1col = -1, y1col = -1, x2col = -1, y2col = -1;
+        size_t x1col = size_t(-1), y1col = size_t(-1), x2col = size_t(-1), y2col = size_t(-1);
         for (i = 0; i < strings.size(); i++) {
             if (strings[i] == "x1")
             {
@@ -67,7 +67,7 @@ namespace EntityParsing {
             }
         }
 
-        if(x1col == -1 || y1col == -1 || x2col == -1 || y2col == -1)
+        if(x1col == size_t(-1) || y1col == size_t(-1) || x2col == size_t(-1) || y2col == size_t(-1))
         {
             throw EntityParseException("Badly formatted header (should contain x1, y1, x2 and y2)");
         }
@@ -138,7 +138,7 @@ namespace EntityParsing {
            }
         }
 
-        int xcol = -1, ycol = -1;
+        size_t xcol = size_t(-1), ycol = size_t(-1);
         for (i = 0; i < strings.size(); i++) {
             if (strings[i] == "x")
             {
@@ -150,7 +150,7 @@ namespace EntityParsing {
             }
         }
 
-        if(xcol == -1 || ycol == -1)
+        if(xcol == size_t(-1) || ycol == size_t(-1))
         {
             throw EntityParseException("Badly formatted header (should contain x and y)");
         }
@@ -224,7 +224,7 @@ namespace EntityParsing {
            }
         }
 
-        int xcol = -1, ycol = -1, anglecol = -1, viewcol = -1;
+        size_t xcol = size_t(-1), ycol = size_t(-1), anglecol = size_t(-1), viewcol = size_t(-1);
         for (i = 0; i < strings.size(); i++) {
             if (strings[i] == "x")
             {
@@ -244,14 +244,14 @@ namespace EntityParsing {
             }
         }
 
-        if(xcol == -1 || ycol == -1 )
+        if(xcol == size_t(-1) || ycol == size_t(-1) )
         {
             throw EntityParseException("Badly formatted header (should contain x and y, might also have angle and viewangle for partial isovists)");
         }
 
 
-        bool partialIsovists =  anglecol != -1 && viewcol != -1;
-        int maxCol = std::max({xcol, ycol, anglecol, viewcol});
+        bool partialIsovists =  anglecol != size_t(-1) && viewcol != size_t(-1);
+        size_t maxCol = std::max({xcol, ycol, anglecol, viewcol});
         while ( !stream.eof())
         {
             std::getline(stream, inputline);
