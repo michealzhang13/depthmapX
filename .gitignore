@@ -9,4 +9,6 @@ depthmapX.pro.user
 *_BASE_*
 *_LOCAL_*
 *_REMOTE_*
+*.autosave
+*.pyc
 
