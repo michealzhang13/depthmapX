@@ -267,7 +267,7 @@ bool AttributeTable::selectionToLayer(const std::string& name)
       // too many layers -- maximum 64
       return false;
    }
-   int64 newlayer = 0x1i64 << loc;
+   int64 newlayer = 0x1LL << loc;
    // now layer has been found, eliminate from available layers 
    // and add a lookup for the name
    m_available_layers = (m_available_layers & (~newlayer));
