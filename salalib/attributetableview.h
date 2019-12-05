@@ -56,7 +56,7 @@ private:
 
 };
 
-struct index_item_key : public std::unary_function<AttributeKey, bool> {
+struct index_item_key { 
     explicit index_item_key(const AttributeKey &baseline) : m_baseline(baseline) {}
     bool operator() (const AttributeIndexItem &arg) { return arg.key.value == m_baseline.value; }
     const AttributeKey& m_baseline;

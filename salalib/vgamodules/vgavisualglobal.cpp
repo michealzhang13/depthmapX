@@ -17,11 +17,19 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "salalib/vgamodules/vgavisualglobal.h"
+#include "genlib/RestartableTimer.h"
+#include "depthmapXcli/simpletimer.h"
+#include <iostream>
 
 #include "genlib/stringutils.h"
 
 bool VGAVisualGlobal::run(Communicator *comm, PointMap &map, bool simple_version) {
-    time_t atime = 0;
+	std::cout << "\nStarting VGAVIsualGlobal::run" << std::endl;
+	RestartableTimer matrixResetTimer;
+	RestartableTimer loopTimer;
+	SimpleTimer overallTiming;
+
+	time_t atime = 0;
     if (comm) {
         qtimer(atime, 0);
         comm->CommPostMessage(Communicator::NUM_RECORDS, map.getFilledPointCount());
@@ -76,12 +84,14 @@ bool VGAVisualGlobal::run(Communicator *comm, PointMap &map, bool simple_version
                     continue;
                 }
 
+				matrixResetTimer.start();
                 for (int ii = 0; ii < map.getCols(); ii++) {
                     for (int jj = 0; jj < map.getRows(); jj++) {
                         miscs(jj, ii) = 0;
                         extents(jj, ii) = PixelRef(ii, jj);
                     }
                 }
+				matrixResetTimer.stop();
 
                 int total_depth = 0;
                 int total_nodes = 0;
@@ -92,6 +102,8 @@ bool VGAVisualGlobal::run(Communicator *comm, PointMap &map, bool simple_version
                 search_tree.back().push_back(curs);
 
                 int level = 0;
+
+				loopTimer.start();
                 while (search_tree[level].size()) {
                     search_tree.push_back(PixelRefVector());
                     const PixelRefVector& searchTreeAtLevel = search_tree[level];
@@ -126,6 +138,7 @@ bool VGAVisualGlobal::run(Communicator *comm, PointMap &map, bool simple_version
                     }
                     level++;
                 }
+				loopTimer.stop();
                 AttributeRow &row = attributes.getRow(AttributeKey(curs));
                 // only set to single float precision after divide
                 // note -- total_nodes includes this one -- mean depth as per p.108 Social Logic of Space
@@ -201,6 +214,8 @@ bool VGAVisualGlobal::run(Communicator *comm, PointMap &map, bool simple_version
             }
         }
     }
+
+	SimpleTimer setMiscsAndExtents;
     for (size_t i = 0; i < map.getCols(); i++) {
         for (size_t j = 0; j < map.getRows(); j++) {
             PixelRef curs = PixelRef(static_cast<short>(i), static_cast<short>(j));
@@ -209,12 +224,18 @@ bool VGAVisualGlobal::run(Communicator *comm, PointMap &map, bool simple_version
         }
     }
     map.setDisplayedAttribute(integ_dv_col);
-
+	std::cout << "Overall Timing: " << overallTiming.getTimeInSeconds()
+		<< "\n  Resetting the matrices: " << matrixResetTimer.getTimeInSeconds() << " count: " << matrixResetTimer.getCount()
+		<< "\n  InnerLoop: " << loopTimer.getTimeInSeconds() << " count: " << loopTimer.getCount() 
+		<< "\n     extractUnseen: " << m_extractUnseenTimer.getTimeInSeconds() << " count: " << m_extractUnseenTimer.getCount()
+		<< "\n  setMiscs:" << setMiscsAndExtents.getTimeInSeconds() << std::endl;
+ 
     return true;
 }
 
 void VGAVisualGlobal::extractUnseen(Node &node, PixelRefVector &pixels, depthmapX::RowMatrix<int> &miscs,
                    depthmapX::RowMatrix<PixelRef> &extents) {
+	m_extractUnseenTimer.start();
     for (int i = 0; i < 32; i++) {
         Bin &bin = node.bin(i);
         for (auto pixVec : bin.m_pixel_vecs) {
@@ -235,4 +256,5 @@ void VGAVisualGlobal::extractUnseen(Node &node, PixelRefVector &pixels, depthmap
             }
         }
     }
+	m_extractUnseenTimer.stop();
 }

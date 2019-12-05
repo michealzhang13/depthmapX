@@ -23,11 +23,13 @@
 #include "salalib/pointdata.h"
 
 #include "genlib/simplematrix.h"
+#include "genlib/RestartableTimer.h"
 
 class VGAVisualGlobal : IVGA {
   private:
     double m_radius;
     bool m_gates_only;
+	RestartableTimer m_extractUnseenTimer;
 
   public:
     std::string getAnalysisName() const override { return "Global Visibility Analysis"; }
